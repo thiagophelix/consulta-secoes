@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Consulta Rápida de Seção Eleitoral</title>
+
+  <!-- PWA & Mobile Capabilities -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Seções Eleitorais">
+  <meta name="theme-color" content="#0f172a">
+
+  <style>
+    :root {
+      --font-scale: 1rem;
+      --primary: #0f172a;
+      --accent: #10b981;
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: var(--font-scale);
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-gradient);
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0.5rem;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (min-width: 640px) {
+      body {
+        justify-content: center;
+        padding: 1rem;
+      }
+    }
+
+    /* Custom Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f8fafc;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 2px;
+    }
+
+    /* Layout Containers & Components */
+    .app-card {
+      width: 100%;
+      max-width: 38rem;
+      background-color: #ffffff;
+      border-radius: 1.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin: auto 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Header */
+    .app-header {
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .tse-badge {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      padding: 0.35rem 0.5rem;
+      border-radius: 0.5rem;
+      font-weight: 900;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .font-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .font-btn:hover { background: #334155; color: #fff; }
+
+    .status-badge {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.65rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .status-badge.online {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .status-badge.offline {
+      background-color: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+    .status-dot.green { background-color: #34d399; box-shadow: 0 0 6px #34d399; }
+    .status-dot.orange { background-color: #fbbf24; box-shadow: 0 0 6px #fbbf24; }
+
+    /* TSE Banner */
+    .tse-official-link {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid #334155;
+      color: #38bdf8;
+      border-radius: 0.75rem;
+      padding: 0.6rem 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-size: 0.725rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .tse-official-link:hover {
+      border-color: #38bdf8;
+      background: #1e293b;
+      color: #7dd3fc;
+      transform: translateY(-1px);
+    }
+
+    /* Main Body */
+    .app-body {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .input-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 0.4rem;
+    }
+
+    .search-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      width: 100%;
+      padding-left: 2.25rem;
+      padding-right: 4.5rem;
+      padding-top: 0.8rem;
+      padding-bottom: 0.8rem;
+      background-color: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 0.75rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #0f172a;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      color: #94a3b8;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-actions {
+      position: absolute;
+      right: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      padding: 0.35rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+    .icon-btn:hover { background-color: #e2e8f0; color: #0f172a; }
+    .icon-btn.recording { color: #ef4444; animation: pulse 1.2s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.1); }
+    }
+
+    .shortcuts-container {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.65rem;
+      font-size: 0.7rem;
+      color: #64748b;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+    }
+
+    .chip-btn {
+      background-color: #f1f5f9;
+      color: #475569;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      border: 1px solid #e2e8f0;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .chip-btn:hover, .chip-btn.active {
+      background-color: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+    }
+
+    /* Result Card */
+    .result-card {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #ffffff;
+      border-radius: 1.25rem;
+      padding: 1.15rem;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-card-highlight {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 0.85rem;
+      padding: 0.65rem 0.85rem;
+      text-align: center;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 6.5rem;
+    }
+
+    .action-group {
+      display: flex;
+      gap: 0.35rem;
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    .copy-btn, .share-btn {
+      flex: 1;
+      font-size: 0.65rem;
+      background-color: #ffffff;
+      color: #0f172a;
+      font-weight: 800;
+      padding: 0.35rem 0.4rem;
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.2rem;
+    }
+    .copy-btn:hover { background-color: #f1f5f9; transform: scale(1.02); }
+    .share-btn { background-color: #10b981; color: #ffffff; }
+    .share-btn:hover { background-color: #059669; transform: scale(1.02); }
+
+    .room-badge {
+      margin-top: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background-color: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 0.3rem 0.6rem;
+      border-radius: 0.375rem;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Tabs & Dropdown Filter */
+    .tabs-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    @media (min-width: 640px) {
+      .tabs-wrapper {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .tab-group {
+      display: flex;
+      background-color: #f1f5f9;
+      padding: 0.25rem;
+      border-radius: 0.75rem;
+      gap: 0.25rem;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.45rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.725rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: transparent;
+      color: #64748b;
+    }
+
+    .tab-btn.active {
+      background-color: #0f172a;
+      color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+
+    .select-dropdown {
+      font-size: 0.75rem;
+      background-color: #ffffff;
+      font-weight: 600;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.5rem;
+      padding: 0.45rem 0.65rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Table Component */
+    .table-container {
+      max-height: 290px;
+      overflow-y: auto;
+      border-radius: 0.75rem;
+      border: 1px solid #e2e8f0;
+      background-color: rgba(248, 250, 252, 0.5);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.75rem;
+    }
+
+    thead {
+      background-color: rgba(241, 245, 249, 0.95);
+      color: #64748b;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      backdrop-filter: blur(4px);
+    }
+
+    th, td {
+      padding: 0.65rem 0.5rem;
+      text-align: center;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    th { border-right: 1px solid #e2e8f0; }
+    td { border-right: 1px solid #f1f5f9; }
+
+    tr.location-row {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-weight: 800;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    tr.location-row td {
+      text-align: left;
+      padding: 0.55rem 0.75rem;
+    }
+
+    tr.match-row {
+      background-color: #ecfdf5;
+      color: #065f46;
+      font-weight: 700;
+      position: relative;
+    }
+
+    td.match-cell {
+      background-color: rgba(209, 250, 229, 0.8);
+      color: #047857;
+      font-weight: 800;
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background-color: #ffffff;
+      border-radius: 1.5rem;
+      max-width: 28rem;
+      width: 100%;
+      padding: 1.5rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .btn-primary {
+      background-color: #0f172a;
+      color: #ffffff;
+      border: none;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: background-color 0.2s;
+      text-decoration: none;
+    }
+    .btn-primary:hover { background-color: #1e293b; }
+
+    .hidden { display: none !important; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  </style>
+</head>
+<body>
+
+  <div class="app-card">
+    
+    <!-- App Header -->
+    <header class="app-header">
+      <div style="display: flex; align-items: center; gap: 0.6rem;">
+        <div class="tse-badge">TSE</div>
+        <div>
+          <h1 style="font-size: 0.875rem; font-weight: 700; line-height: 1.2;">Consulta de Seção Eleitoral</h1>
+          <p style="font-size: 0.625rem; color: #94a3b8; font-weight: 500; margin-top: 0.1rem;">Conversor Seção Antiga → Nova</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Accessibility Font Size Adjuster -->
+        <div style="display: flex; gap: 0.2rem;" title="Ajustar Tamanho do Texto">
+          <button onclick="alterarTamanhoFonte(-0.05)" class="font-btn" title="Diminuir texto">A-</button>
+          <button onclick="alterarTamanhoFonte(0.05)" class="font-btn" title="Aumentar texto">A+</button>
+        </div>
+
+        <button id="networkStatusBadge" onclick="abrirModalOffline()" class="status-badge online" title="Status de conexão">
+          <span class="status-dot green"></span>
+          <span>Online</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- App Body Container -->
+    <div class="app-body">
+      <!-- TSE Direct Official Portal Link Banner -->
+      <a 
+        href="https://www.tse.jus.br/servicos-eleitorais/autoatendimento-eleitoral#/?id=1740416188898" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        class="tse-official-link"
+        id="tseExternalBanner"
+        title="Consulta oficial por Nome, CPF ou Título no TSE"
+      >
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1rem;">🌐</span>
+          <span>Consultar Local por Nome/CPF no Site do TSE</span>
+        </div>
+        <span style="font-size: 0.8rem; opacity: 0.8;">↗</span>
+      </a>
+
+      <!-- Search Input Section -->
+      <div>
+        <div class="input-label">
+          <span>Digite o nº da Seção (Antiga ou Atual):</span>
+          <span id="totalCounter" style="font-size: 0.65rem; color: #64748b; font-weight: 600;"></span>
+        </div>
+        
+        <div class="search-wrapper">
+          <input 
+            type="text" 
+            inputmode="numeric" 
+            pattern="[0-9]*"
+            id="searchInput"
+            placeholder="Ex: 56, 1, 81, 546..."
+            class="search-input"
+            oninput="buscarSecao()"
+            autofocus
+          >
+          <div class="search-icon">
+            <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+
+          <div class="input-actions">
+            <!-- Voice Input Mic Button -->
+            <button 
+              id="voiceBtn" 
+              onclick="iniciarBuscaPorVoz()" 
+              class="icon-btn" 
+              title="Falar número da seção"
+            >
+              <svg style="width: 1.1rem; height: 1.1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+              </svg>
+            </button>
+
+            <!-- Clear Search Button -->
+            <button 
+              id="clearBtn"
+              onclick="limparBusca()"
+              class="icon-btn hidden"
+              title="Limpar busca"
+            >
+              <svg style="width: 1.1rem; height: 1.1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Shortcut Chips & Quick Filters -->
+        <div class="shortcuts-container custom-scrollbar">
+          <span style="font-weight: 700; font-size: 0.6rem; text-transform: uppercase;">Filtros:</span>
+          <button onclick="definirBusca('56')" class="chip-btn">56</button>
+          <button onclick="definirBusca('1')" class="chip-btn">1</button>
+          <button onclick="definirBusca('81')" class="chip-btn">81</button>
+          <button onclick="filtrarPorAmbiente('Teatro')" class="chip-btn">🎭 Teatro</button>
+          <button onclick="filtrarPorAmbiente('Quadra')" class="chip-btn">🏀 Quadra</button>
+          <button onclick="filtrarPorAmbiente('Secretaria')" class="chip-btn">🏢 Secretaria</button>
+          <button onclick="filtrarPorAmbiente('Z36')" class="chip-btn">⭐ Zona 036</button>
+        </div>
+      </div>
+
+      <!-- Instant Search Results Box -->
+      <div id="resultsContainer" class="hidden">
+        <div id="resultsContent" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+      </div>
+
+      <!-- Tabs & Location Filters -->
+      <div class="tabs-wrapper">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; width: 100%;">
+          <div class="tab-group" style="flex: 1;">
+            <button 
+              id="tabPrincipais" 
+              onclick="mudarAba('principais')" 
+              class="tab-btn active"
+            >
+              Local Principal (SESC)
+            </button>
+            <button 
+              id="tabOutros" 
+              onclick="mudarAba('outros')" 
+              class="tab-btn"
+            >
+              Outros Locais
+            </button>
+          </div>
+          <select id="locationSelect" onchange="renderizarTabela(this.value)" class="select-dropdown">
+            <!-- Dynamically populated based on active tab -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Compact Section Mapping Table -->
+      <div class="table-container custom-scrollbar">
+        <table>
+          <thead>
+            <tr>
+              <th>Antiga 1*</th>
+              <th>Antiga 2</th>
+              <th style="color: #0f172a;">Atual</th>
+              <th style="color: #0f172a;">Ambiente</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+      <div style="font-size: 0.65rem; color: #64748b; font-weight: 600; font-style: italic; display: flex; align-items: center; gap: 0.25rem; margin-top: 0.35rem; padding-left: 0.25rem;">
+        <span>* Seções pertencentes à antiga Zona 036.</span>
+      </div>
+    </div>
+
+    <!-- Mini Footer -->
+    <footer style="background-color: rgba(248, 250, 252, 0.9); padding: 0.75rem; text-align: center; font-size: 0.65rem; color: #94a3b8; border-top: 1px solid #f1f5f9; font-weight: 500; display: flex; justify-content: space-between; align-items: center; padding-left: 1.25rem; padding-right: 1.25rem;">
+      <span>Base TSE Offline v3.0</span>
+      <button onclick="abrirModalOffline()" style="background: none; border: none; color: #475569; font-size: 0.65rem; font-weight: 700; cursor: pointer; text-decoration: underline;">
+        ⚡ Instalar / Usar Offline
+      </button>
+    </footer>
+  </div>
+
+  <!-- Offline Download / Installation Instructions Modal -->
+  <div id="offlineModal" class="modal-overlay" onclick="fecharModalOffline(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 1rem; font-weight: 800; color: #0f172a;">Usar sem Internet no Celular</h3>
+        <button onclick="fecharModalOffline()" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">&times;</button>
+      </div>
+
+      <p style="font-size: 0.75rem; color: #475569; line-height: 1.4;">
+        Este aplicativo é <strong>100% autônomo</strong>. Você pode salvá-lo no celular e usá-lo no dia da votação sem sinal de internet ou Wi-Fi.
+      </p>
+
+      <div style="background-color: #f8fafc; padding: 0.85rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 0.5rem;">
+        <span style="font-size: 0.7rem; font-weight: 800; color: #0f172a; text-transform: uppercase;">Como Salvar no Celular:</span>
+        <div style="font-size: 0.7rem; color: #334155; line-height: 1.4;">
+          <strong>No Android (Chrome):</strong> Toque no menu (<strong>⋮</strong>) e escolha <em>"Adicionar à tela inicial"</em>.
+        </div>
+        <div style="font-size: 0.7rem; color: #334155; line-height: 1.4;">
+          <strong>No iPhone (Safari):</strong> Toque no botão Compartilhar e escolha <em>"Adicionar à Tela de Início"</em>.
+        </div>
+      </div>
+
+      <button onclick="baixarAppOffline()" class="btn-primary">
+        <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+        Baixar Arquivo .HTML para Guardar
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const RELACAO_SECOES = [
+      {
+        local: "SESC",
+        secoes: [
+          { a1: 81,   a2: 46,  atual: 496 },
+          { a1: 82,   a2: 47,  atual: 497 },
+          { a1: 83,   a2: 48,  atual: 498 },
+          { a1: 84,   a2: 49,  atual: 499 },
+          { a1: 85,   a2: 50,  atual: 500 },
+          { a1: 86,   a2: 51,  atual: 501 },
+          { a1: 87,   a2: 52,  atual: 502 },
+          { a1: 88,   a2: 53,  atual: 503 },
+          { a1: 89,   a2: 54,  atual: 504 },
+          { a1: 90,   a2: 55,  atual: 505 },
+          { a1: 91,   a2: 56,  atual: 506 },
+          { a1: null, a2: 98,  atual: 507 },
+          { a1: null, a2: 101, atual: 508 },
+          { a1: null, a2: 109, atual: 510 },
+          { a1: null, a2: 119, atual: 511 },
+          { a1: null, a2: 139, atual: 512 },
+          { a1: null, a2: 146, atual: 513 },
+          { a1: 56,   a2: 1,   atual: 546 },
+          { a1: 57,   a2: 2,   atual: 547 },
+          { a1: 58,   a2: 3,   atual: 548 },
+          { a1: 59,   a2: 4,   atual: 549 },
+          { a1: 60,   a2: 5,   atual: 550 },
+          { a1: 61,   a2: 6,   atual: 551 },
+          { a1: 62,   a2: 7,   atual: 552 },
+          { a1: null, a2: null, atual: 626 }
+        ]
+      },
+      {
+        local: "CLUBE MAUÁ",
+        secoes: [
+          { a1: 63,  a2: 8,  atual: 553 },
+          { a1: 64,  a2: 9,  atual: 554 },
+          { a1: 65,  a2: 10, atual: 555 },
+          { a1: 66,  a2: 11, atual: 556 },
+          { a1: 67,  a2: 12, atual: 557 },
+          { a1: 68,  a2: 13, atual: 558 },
+          { a1: 69,  a2: 14, atual: 559 },
+          { a1: 70,  a2: 15, atual: 560 },
+          { a1: 71,  a2: 16, atual: 561 },
+          { a1: 72,  a2: 17, atual: 562 },
+          { a1: 398, a2: 18, atual: 563 }
+        ]
+      },
+      {
+        local: "COLÉGIO INDEPENDÊNCIA",
+        secoes: [
+          { a1: 330,  a2: 19,  atual: 613 },
+          { a1: 340,  a2: 20,  atual: 614 },
+          { a1: 347,  a2: 21,  atual: 615 },
+          { a1: 360,  a2: 22,  atual: 616 },
+          { a1: 384,  a2: 23,  atual: 617 },
+          { a1: 402,  a2: 24,  atual: 618 },
+          { a1: 429,  a2: 25,  atual: 619 },
+          { a1: 132,  a2: 96,  atual: 620 },
+          { a1: 133,  a2: 97,  atual: 621 },
+          { a1: null, a2: 100, atual: 622 },
+          { a1: null, a2: 113, atual: 623 },
+          { a1: null, a2: 123, atual: 624 },
+          { a1: null, a2: 135, atual: 625 }
+        ]
+      },
+      {
+        local: "EM VISCONDE DE SEPETIBA",
+        secoes: [
+          { a1: 164,  a2: 39,  atual: 526 },
+          { a1: 165,  a2: 40,  atual: 527 },
+          { a1: 298,  a2: 41,  atual: 528 },
+          { a1: 314,  a2: 42,  atual: 529 },
+          { a1: 338,  a2: 43,  atual: 530 },
+          { a1: 356,  a2: 44,  atual: 531 },
+          { a1: 361,  a2: 45,  atual: 532 },
+          { a1: null, a2: 99,  atual: 533 },
+          { a1: null, a2: 102, atual: 534 },
+          { a1: null, a2: 112, atual: 535 },
+          { a1: null, a2: 117, atual: 536 },
+          { a1: null, a2: 128, atual: 537 }
+        ]
+      },
+      {
+        local: "E.E. CRUZEIRO DO SUL",
+        secoes: [
+          { a1: 156,  a2: 57,  atual: 483 },
+          { a1: 157,  a2: 58,  atual: 484 },
+          { a1: 158,  a2: 59,  atual: 485 },
+          { a1: 369,  a2: 60,  atual: 486 },
+          { a1: null, a2: 104, atual: 487 },
+          { a1: null, a2: 130, atual: 488 }
+        ]
+      },
+      {
+        local: "EQUIPE MÁXIMA DE ENSINO",
+        secoes: [
+          { a1: 334,  a2: 89,  atual: 607 },
+          { a1: 344,  a2: 90,  atual: 608 },
+          { a1: 352,  a2: 91,  atual: 609 },
+          { a1: 366,  a2: 92,  atual: 610 },
+          { a1: null, a2: 129, atual: 611 },
+          { a1: null, a2: 140, atual: 612 }
+        ]
+      }
+    ];
+
+    const MAPA_SALAS = {
+      496: "Secretaria Térreo", 511: "Secretaria Térreo",
+      497: "Secr. 2º Andar", 498: "Secr. 2º Andar", 499: "Secr. 2º Andar", 500: "Secr. 2º Andar", 501: "Secr. 2º Andar", 502: "Secr. 2º Andar",
+      507: "Teatro", 550: "Teatro",
+      513: "Quadra", 546: "Quadra",
+      548: "Sala de Luta", 549: "Sala de Luta",
+      551: "Sala de Pilates", 552: "Sala de Pilates", 626: "Sala de Pilates",
+      547: "Academia",
+      503: "Administração", 504: "Administração", 505: "Administração", 506: "Administração", 508: "Administração", 509: "Administração", 510: "Administração", 512: "Administração"
+    };
+
+    const SECOES_ZONA_036 = new Set([56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 81, 82, 83, 84, 85, 86, 87, 89, 90, 91, 398]);
+
+    const LOCAIS_PRINCIPAIS = ["SESC"];
+    let activeTab = 'principais';
+    let activeSearchNum = null;
+    let ambienteFilter = null;
+    let currentFontScale = 1.0;
+
+    function acionarVibracao() {
+      try {
+        if ('vibrate' in navigator && typeof navigator.vibrate === 'function') {
+          navigator.vibrate([15]);
+        }
+      } catch (e) {
+        // Fallback safe for devices without vibration
+      }
+    }
+
+    function alterarTamanhoFonte(delta) {
+      acionarVibracao();
+      currentFontScale = Math.min(Math.max(currentFontScale + delta, 0.85), 1.25);
+      document.documentElement.style.setProperty('--font-scale', `${currentFontScale}rem`);
+    }
+
+    function eLocalPrincipal(localName) {
+      return LOCAIS_PRINCIPAIS.includes(localName);
+    }
+
+    function mudarAba(aba, manterFiltroSelect = false) {
+      acionarVibracao();
+      activeTab = aba;
+      ambienteFilter = null;
+      
+      const tabPrincipais = document.getElementById('tabPrincipais');
+      const tabOutros = document.getElementById('tabOutros');
+      const select = document.getElementById('locationSelect');
+
+      if (!tabPrincipais || !tabOutros || !select) return;
+
+      if (aba === 'principais') {
+        tabPrincipais.className = "tab-btn active";
+        tabOutros.className = "tab-btn";
+        
+        select.innerHTML = `
+          <option value="TODOS">Todos Principais (SESC)</option>
+          <option value="SESC">SESC</option>
+        `;
+      } else {
+        tabOutros.className = "tab-btn active";
+        tabPrincipais.className = "tab-btn";
+        
+        select.innerHTML = `
+          <option value="TODOS">Todos Outros Locais</option>
+          <option value="CLUBE MAUÁ">Clube Mauá</option>
+          <option value="COLÉGIO INDEPENDÊNCIA">Colégio Independência</option>
+          <option value="EM VISCONDE DE SEPETIBA">EM Visconde de Sepetiba</option>
+          <option value="E.E. CRUZEIRO DO SUL">E.E. Cruzeiro do Sul</option>
+          <option value="EQUIPE MÁXIMA DE ENSINO">Equipe Máxima de Ensino</option>
+        `;
+      }
+
+      if (!manterFiltroSelect) {
+        select.value = "TODOS";
+      }
+      renderizarTabela(select.value);
+    }
+
+    function iniciarBuscaPorVoz() {
+      acionarVibracao();
+      try {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+          exibirToast("Reconhecimento de voz não suportado neste navegador.");
+          return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'pt-BR';
+        const voiceBtn = document.getElementById('voiceBtn');
+        if (voiceBtn) voiceBtn.classList.add('recording');
+
+        recognition.onresult = (event) => {
+          if (voiceBtn) voiceBtn.classList.remove('recording');
+          const transcript = event.results[0][0].transcript;
+          const numeros = transcript.replace(/\D/g, '');
+          if (numeros) {
+            definirBusca(numeros);
+          } else {
+            exibirToast(`Ouvi: "${transcript}". Digite o número.`);
+          }
+        };
+
+        recognition.onerror = () => {
+          if (voiceBtn) voiceBtn.classList.remove('recording');
+          exibirToast("Não foi possível ouvir. Tente digitar.");
+        };
+
+        recognition.onend = () => {
+          if (voiceBtn) voiceBtn.classList.remove('recording');
+        };
+
+        recognition.start();
+      } catch (e) {
+        exibirToast("Busca por voz não disponível.");
+      }
+    }
+
+    function buscarSecao() {
+      const input = document.getElementById('searchInput');
+      if (!input) return;
+
+      const query = input.value.trim();
+      const clearBtn = document.getElementById('clearBtn');
+      const resultsContainer = document.getElementById('resultsContainer');
+      const resultsContent = document.getElementById('resultsContent');
+
+      if (!query) {
+        if (clearBtn) clearBtn.classList.add('hidden');
+        if (resultsContainer) resultsContainer.classList.add('hidden');
+        activeSearchNum = null;
+        renderizarTabela(document.getElementById('locationSelect')?.value || 'TODOS');
+        return;
+      }
+
+      if (clearBtn) clearBtn.classList.remove('hidden');
+      const numQuery = parseInt(query, 10);
+      activeSearchNum = numQuery;
+
+      const resultados = [];
+
+      RELACAO_SECOES.forEach(bloco => {
+        bloco.secoes.forEach(item => {
+          if (item.a1 === numQuery || item.a2 === numQuery || item.atual === numQuery) {
+            resultados.push({ local: bloco.local, item });
+          }
+        });
+      });
+
+      if (resultsContainer) resultsContainer.classList.remove('hidden');
+
+      if (resultados.length === 0) {
+        if (resultsContent) {
+          resultsContent.innerHTML = `
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; color: #334155; padding: 1rem; border-radius: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: 600;">
+                <span style="color: #64748b; font-size: 1rem;">⚠️️</span>
+                <span>Seção <strong style="color: #0f172a;">"${query}"</strong> não consta na lista local.</span>
+              </div>
+              <a href="https://www.tse.jus.br/servicos-eleitorais/autoatendimento-eleitoral#/?id=1740416188898" target="_blank" rel="noopener noreferrer" class="btn-primary" style="background-color: #0284c7; text-decoration: none;">
+                🔍 Consultar diretamente no Site Oficial do TSE ↗
+              </a>
+            </div>
+          `;
+        }
+      } else {
+        let html = '';
+        resultados.forEach(res => {
+          const item = res.item;
+          const ambiente = MAPA_SALAS[item.atual];
+          const isZona36 = item.a1 !== null && SECOES_ZONA_036.has(item.a1);
+          const ambienteHtml = ambiente 
+            ? `<div class="room-badge">
+                 📍 ${ambiente}
+               </div>`
+            : '';
+          const zona36Html = isZona36
+            ? `<div style="font-size: 0.65rem; color: #fbbf24; font-weight: 700; margin-top: 0.2rem; display: flex; align-items: center; gap: 0.2rem;">
+                 ⭐ Antiga Zona 036
+               </div>`
+            : '';
+
+          html += `
+            <div class="result-card">
+              <div style="display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; flex: 1;">
+                <span style="font-size: 0.65rem; text-transform: uppercase; font-weight: 800; color: #cbd5e1; letter-spacing: 0.05em;">
+                  🏢 ${res.local}
+                </span>
+                <div style="font-size: 0.725rem; color: #94a3b8; font-weight: 500; display: flex; gap: 0.5rem;">
+                  <span>Ant.1: <strong style="color: #f8fafc;">${item.a1 !== null ? item.a1 + (isZona36 ? '*' : '') : '—'}</strong></span>
+                  <span style="opacity: 0.4;">|</span>
+                  <span>Ant.2: <strong style="color: #f8fafc;">${item.a2 ?? '—'}</strong></span>
+                </div>
+                ${zona36Html}
+                ${ambienteHtml}
+              </div>
+
+              <div class="result-card-highlight">
+                <span style="font-size: 0.55rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #cbd5e1;">SEÇÃO ATUAL</span>
+                <span class="mono" style="font-size: 1.85rem; font-weight: 900; color: #ffffff; line-height: 1;">${item.atual}</span>
+                
+                <div class="action-group">
+                  <button 
+                    onclick="copiarSimples('${res.local}', '${item.a1 ?? '—'}', '${item.a2 ?? '—'}', '${item.atual}', '${ambiente ?? ''}')"
+                    class="copy-btn"
+                    title="Copiar texto"
+                  >
+                    📋 Copiar
+                  </button>
+                  <button 
+                    onclick="compartilharResultado('${res.local}', '${item.a1 ?? '—'}', '${item.a2 ?? '—'}', '${item.atual}', '${ambiente ?? ''}')"
+                    class="share-btn"
+                    title="Compartilhar"
+                  >
+                    📲
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        if (resultsContent) resultsContent.innerHTML = html;
+
+        const primeiroResultado = resultados[0];
+        const ePrincipal = eLocalPrincipal(primeiroResultado.local);
+        const abaNecessaria = ePrincipal ? 'principais' : 'outros';
+        if (activeTab !== abaNecessaria) {
+          mudarAba(abaNecessaria, true);
+          return;
+        }
+      }
+
+      renderizarTabela(document.getElementById('locationSelect')?.value || 'TODOS');
+    }
+
+    function renderizarTabela(filtroLocal = 'TODOS') {
+      const tbody = document.getElementById('tableBody');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+
+      const dadosAba = RELACAO_SECOES.filter(bloco => {
+        if (activeTab === 'principais') {
+          return LOCAIS_PRINCIPAIS.includes(bloco.local);
+        } else {
+          return !LOCAIS_PRINCIPAIS.includes(bloco.local);
+        }
+      });
+
+      const dadosFiltrados = filtroLocal === 'TODOS' 
+        ? dadosAba 
+        : dadosAba.filter(d => d.local === filtroLocal);
+
+      let totalSecoesContadas = 0;
+
+      dadosFiltrados.forEach(bloco => {
+        let secoesVisiveis = bloco.secoes;
+
+        if (ambienteFilter) {
+          if (ambienteFilter === 'Z36') {
+            secoesVisiveis = secoesVisiveis.filter(s => s.a1 !== null && SECOES_ZONA_036.has(s.a1));
+          } else {
+            secoesVisiveis = secoesVisiveis.filter(s => {
+              const amb = MAPA_SALAS[s.atual] || '';
+              return amb.toLowerCase().includes(ambienteFilter.toLowerCase());
+            });
+          }
+        }
+
+        if (secoesVisiveis.length === 0) return;
+
+        totalSecoesContadas += secoesVisiveis.length;
+
+        const headerRow = document.createElement('tr');
+        headerRow.className = "location-row";
+        headerRow.innerHTML = `
+          <td colspan="4">
+            🏢 ${bloco.local} 
+            <span style="font-weight: 600; opacity: 0.6; margin-left: 0.25rem;">(${secoesVisiveis.length} seções)</span>
+          </td>
+        `;
+        tbody.appendChild(headerRow);
+
+        secoesVisiveis.forEach(row => {
+          const isMatch = activeSearchNum !== null && (row.a1 === activeSearchNum || row.a2 === activeSearchNum || row.atual === activeSearchNum);
+          const ambienteStr = MAPA_SALAS[row.atual] || '<span style="opacity:0.3">—</span>';
+          const isZ36 = row.a1 !== null && SECOES_ZONA_036.has(row.a1);
+          
+          const tr = document.createElement('tr');
+          if (isMatch) {
+            tr.className = 'match-row';
+          }
+
+          const displayA1 = row.a1 !== null 
+            ? `${row.a1}${isZ36 ? '<span style="color:#eab308; font-weight:bold;" title="Antiga Zona 036">*</span>' : ''}` 
+            : '<span style="color:#cbd5e1; font-family:sans-serif;">—</span>';
+
+          tr.innerHTML = `
+            <td class="mono ${row.a1 === activeSearchNum ? 'match-cell' : ''}">
+              ${displayA1}
+            </td>
+            <td class="mono ${row.a2 === activeSearchNum ? 'match-cell' : ''}">
+              ${row.a2 ?? '<span style="color:#cbd5e1; font-family:sans-serif;">—</span>'}
+            </td>
+            <td class="mono ${row.atual === activeSearchNum ? 'match-cell' : ''}" style="font-weight: 800; color: #0f172a;">
+              ${row.atual}
+            </td>
+            <td style="font-size: 0.65rem; text-transform: uppercase; font-weight: 600; color: #64748b; ${row.atual === activeSearchNum ? 'color: #047857;' : ''}">
+              ${ambienteStr}
+            </td>
+          `;
+
+          tbody.appendChild(tr);
+        });
+      });
+
+      const totalCounter = document.getElementById('totalCounter');
+      if (totalCounter) {
+        totalCounter.innerText = `${totalSecoesContadas} seções`;
+      }
+    }
+
+    function definirBusca(val) {
+      acionarVibracao();
+      const input = document.getElementById('searchInput');
+      if (input) {
+        input.value = val;
+        buscarSecao();
+      }
+    }
+
+    function filtrarPorAmbiente(ambiente) {
+      acionarVibracao();
+      if (ambienteFilter === ambiente) {
+        ambienteFilter = null;
+      } else {
+        ambienteFilter = ambiente;
+      }
+      renderizarTabela(document.getElementById('locationSelect')?.value || 'TODOS');
+    }
+
+    function limparBusca() {
+      acionarVibracao();
+      const input = document.getElementById('searchInput');
+      if (input) {
+        input.value = '';
+        buscarSecao();
+      }
+    }
+
+    function gerarTextoCompartilhavel(local, a1, a2, atual, ambiente = '') {
+      const ambTexto = ambiente && ambiente !== 'undefined' ? `\n📍 Ambiente: ${ambiente}` : '';
+      const numA1 = parseInt(a1, 10);
+      const z36Texto = !isNaN(numA1) && SECOES_ZONA_036.has(numA1) ? ' (Zona 036)' : '';
+      return `🗳️ *Consulta de Seção Eleitoral*\n🏢 Local: ${local}\n👉 *Seção Atual: ${atual}*${ambTexto}\n-------------------\nAntiga 1: ${a1}${z36Texto} | Antiga 2: ${a2}`;
+    }
+
+    function copiarSimples(local, a1, a2, atual, ambiente = '') {
+      acionarVibracao();
+      const texto = gerarTextoCompartilhavel(local, a1, a2, atual, ambiente);
+      
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(texto);
+        } else {
+          const textArea = document.createElement("textarea");
+          textArea.value = texto;
+          textArea.style.position = "fixed";
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+        }
+        exibirToast(`✓ Copiado para a área de transferência!`);
+      } catch (e) {
+        exibirToast(`✓ Informação selecionada.`);
+      }
+    }
+
+    function compartilharResultado(local, a1, a2, atual, ambiente = '') {
+      acionarVibracao();
+      const texto = gerarTextoCompartilhavel(local, a1, a2, atual, ambiente);
+
+      try {
+        if (navigator.share) {
+          navigator.share({
+            title: 'Local de Votação',
+            text: texto
+          }).catch(() => {});
+        } else {
+          copiarSimples(local, a1, a2, atual, ambiente);
+        }
+      } catch (e) {
+        copiarSimples(local, a1, a2, atual, ambiente);
+      }
+    }
+
+    function exibirToast(msg) {
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed; bottom:1.25rem; left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; font-size:0.75rem; padding:0.6rem 1.2rem; border-radius:9999px; box-shadow:0 10px 20px rgba(0,0,0,0.4); z-index:999; font-weight:700; border:1px solid #334155; animation: fadeIn 0.2s ease-out; pointer-events:none;';
+      toast.innerHTML = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2200);
+    }
+
+    function abrirModalOffline() {
+      acionarVibracao();
+      const modal = document.getElementById('offlineModal');
+      if (modal) modal.classList.add('active');
+    }
+
+    function fecharModalOffline(e) {
+      const modal = document.getElementById('offlineModal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function atualizarStatusConexao() {
+      const badge = document.getElementById('networkStatusBadge');
+      const tseBanner = document.getElementById('tseExternalBanner');
+
+      if (navigator.onLine) {
+        if (badge) {
+          badge.className = 'status-badge online';
+          badge.innerHTML = `<span class="status-dot green"></span><span>Online</span>`;
+        }
+        if (tseBanner) {
+          tseBanner.style.opacity = '1';
+          tseBanner.style.pointerEvents = 'auto';
+        }
+      } else {
+        if (badge) {
+          badge.className = 'status-badge offline';
+          badge.innerHTML = `<span class="status-dot orange"></span><span>Modo Offline</span>`;
+        }
+        if (tseBanner) {
+          tseBanner.style.opacity = '0.75';
+        }
+      }
+    }
+
+    window.addEventListener('online', atualizarStatusConexao);
+    window.addEventListener('offline', atualizarStatusConexao);
+
+    function baixarAppOffline() {
+      acionarVibracao();
+      limparBusca();
+      
+      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Consulta_Secoes_Eleitorais_Offline.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function inicializarAplicativo() {
+      try {
+        atualizarStatusConexao();
+        mudarAba('principais');
+      } catch (err) {
+        console.error("Erro ao inicializar base de dados:", err);
+      }
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      inicializarAplicativo();
+    } else {
+      document.addEventListener('DOMContentLoaded', inicializarAplicativo);
+    }
+  </script>
+</body>
+</html>
