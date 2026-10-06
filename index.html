@@ -116,7 +116,7 @@
       align-items: center;
       gap: 0.75rem;
       min-width: 0;
-      flex: 1;
+      flex: 1 1 auto;
     }
 
     .brand-icon-wrapper {
@@ -132,14 +132,18 @@
       flex-shrink: 0;
     }
 
+    .header-titles {
+      min-width: 0;
+      flex: 1;
+    }
+
     .header-titles h1 {
       font-size: var(--fluid-title);
       font-weight: 800;
       line-height: 1.2;
       letter-spacing: -0.01em;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: normal;
+      word-break: break-word;
     }
 
     .header-titles p {
@@ -154,6 +158,26 @@
       align-items: center;
       gap: 0.5rem;
       flex-shrink: 0;
+    }
+
+    /* Regra responsiva dedicada para telas menores / celulares */
+    @media (max-width: 520px) {
+      .app-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.65rem;
+      }
+
+      .brand-group {
+        width: 100%;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+        padding-top: 0.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+      }
     }
 
     .font-btn {
