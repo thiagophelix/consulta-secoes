@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Optimized viewport for multi-device responsiveness and native mobile notch handling -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>Consulta Rápida de Seção Eleitoral</title>
 
   <!-- PWA & Mobile Capabilities -->
@@ -10,14 +11,31 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Seções Eleitorais">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0b132b">
 
   <style>
     :root {
-      --font-scale: 1rem;
-      --primary: #0f172a;
-      --accent: #10b981;
-      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --font-scale: 1;
+      /* Dynamic fluid typography */
+      --fluid-title: clamp(0.95rem, 2vw + 0.5rem, 1.35rem);
+      --fluid-body: clamp(0.8rem, 1.2vw + 0.4rem, 0.95rem);
+      --fluid-mono: clamp(1.5rem, 4vw + 0.5rem, 2.25rem);
+      
+      --bg-dark: #0b132b;
+      --card-bg: #ffffff;
+      --accent-primary: #0284c7;
+      --accent-hover: #0369a1;
+      --emerald-accent: #10b981;
+      --amber-accent: #f59e0b;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-600: #475569;
+      --slate-700: #334155;
+      --slate-900: #0f172a;
+
+      /* Touch target standard size */
+      --touch-target: 2.75rem;
     }
 
     *, *::before, *::after {
@@ -27,206 +45,255 @@
     }
 
     html {
-      font-size: var(--font-scale);
+      font-size: calc(16px * var(--font-scale));
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
     }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg-gradient);
-      color: #1e293b;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0%, #0f172a 60%, #0b132b 100%);
+      color: var(--slate-900);
+      /* Safe viewport height handling for mobile browsers (dvh with vh fallback) */
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      padding: 0.5rem;
+      justify-content: center;
+      /* Handle iPhone notch and safe areas on mobile devices */
+      padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
       -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
     }
 
-    @media (min-width: 640px) {
-      body {
-        justify-content: center;
-        padding: 1rem;
-      }
-    }
-
-    /* Custom Scrollbar */
+    /* Scrollbar Optimization */
     .custom-scrollbar::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
+      width: 6px;
+      height: 6px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
-      background: #f8fafc;
+      background: var(--slate-100);
+      border-radius: 4px;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
       background: #cbd5e1;
-      border-radius: 2px;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
     }
 
-    /* Layout Containers & Components */
+    /* Multi-platform Responsive Card Container */
     .app-card {
       width: 100%;
-      max-width: 38rem;
-      background-color: #ffffff;
-      border-radius: 1.5rem;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+      max-width: clamp(20rem, 95vw, 48rem);
+      background-color: var(--card-bg);
+      border-radius: clamp(0.85rem, 2vw, 1.5rem);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      margin: auto 0;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin: auto;
+      transition: max-width 0.3s ease, border-radius 0.3s ease;
     }
 
-    /* Header */
+    /* Responsive Header Component */
     .app-header {
-      background-color: #0f172a;
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
       color: #ffffff;
-      padding: 1rem 1.25rem;
+      padding: clamp(0.75rem, 2vw, 1.25rem) clamp(0.85rem, 2.5vw, 1.5rem);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #1e293b;
+      gap: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      flex-wrap: wrap;
     }
 
-    .tse-badge {
-      background-color: #1e293b;
-      border: 1px solid #334155;
-      color: #e2e8f0;
-      padding: 0.35rem 0.5rem;
-      border-radius: 0.5rem;
-      font-weight: 900;
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .brand-icon-wrapper {
+      width: clamp(2rem, 4vw, 2.5rem);
+      height: clamp(2rem, 4vw, 2.5rem);
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      border-radius: 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+      flex-shrink: 0;
+    }
+
+    .header-titles h1 {
+      font-size: var(--fluid-title);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-titles p {
+      font-size: clamp(0.6rem, 1vw, 0.75rem);
+      color: #94a3b8;
+      font-weight: 500;
+      margin-top: 0.1rem;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      flex-shrink: 0;
     }
 
     .font-btn {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       color: #cbd5e1;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       font-weight: 700;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.375rem;
+      min-width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 0.5rem;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.15s ease;
     }
-    .font-btn:hover { background: #334155; color: #fff; }
+    .font-btn:hover, .font-btn:focus-visible {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      outline: none;
+    }
 
     .status-badge {
-      font-size: 0.65rem;
+      font-size: clamp(0.6rem, 1vw, 0.7rem);
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      padding: 0.3rem 0.65rem;
+      padding: 0.4rem 0.75rem;
       border-radius: 9999px;
-      font-weight: 700;
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.4rem;
       cursor: pointer;
       transition: all 0.2s ease;
+      height: 2.2rem;
+      border: none;
     }
 
     .status-badge.online {
-      background-color: rgba(16, 185, 129, 0.15);
+      background-color: rgba(16, 185, 129, 0.12);
       color: #34d399;
-      border: 1px solid rgba(52, 211, 153, 0.3);
+      border: 1px solid rgba(52, 211, 153, 0.25);
     }
 
     .status-badge.offline {
-      background-color: rgba(245, 158, 11, 0.15);
+      background-color: rgba(245, 158, 11, 0.12);
       color: #fbbf24;
-      border: 1px solid rgba(251, 191, 36, 0.3);
+      border: 1px solid rgba(251, 191, 36, 0.25);
     }
 
     .status-dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
+      flex-shrink: 0;
     }
     .status-dot.green { background-color: #34d399; box-shadow: 0 0 6px #34d399; }
     .status-dot.orange { background-color: #fbbf24; box-shadow: 0 0 6px #fbbf24; }
 
-    /* TSE Banner */
+    /* App Body */
+    .app-body {
+      padding: clamp(0.85rem, 2.5vw, 1.5rem);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.85rem, 2vw, 1.25rem);
+    }
+
+    /* Official External Banner */
     .tse-official-link {
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      border: 1px solid #334155;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border: 1px solid rgba(2, 132, 199, 0.35);
       color: #38bdf8;
-      border-radius: 0.75rem;
-      padding: 0.6rem 0.85rem;
+      border-radius: 0.85rem;
+      padding: clamp(0.65rem, 1.5vw, 0.85rem) clamp(0.85rem, 2vw, 1.15rem);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 0.5rem;
-      font-size: 0.725rem;
+      gap: 0.6rem;
+      font-size: clamp(0.7rem, 1.2vw, 0.825rem);
       font-weight: 600;
       text-decoration: none;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+      min-height: var(--touch-target);
     }
-    .tse-official-link:hover {
+    .tse-official-link:hover, .tse-official-link:focus-visible {
       border-color: #38bdf8;
-      background: #1e293b;
-      color: #7dd3fc;
       transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.25);
+      outline: none;
     }
 
-    /* Main Body */
-    .app-body {
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
+    /* Inputs and Controls */
     .input-label {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 0.75rem;
+      font-size: clamp(0.7rem, 1.1vw, 0.8rem);
       font-weight: 600;
-      color: #475569;
+      color: var(--slate-600);
       margin-bottom: 0.4rem;
+      flex-wrap: wrap;
+      gap: 0.25rem;
     }
 
     .search-wrapper {
       position: relative;
       display: flex;
       align-items: center;
+      width: 100%;
     }
 
     .search-input {
       width: 100%;
-      padding-left: 2.25rem;
-      padding-right: 4.5rem;
-      padding-top: 0.8rem;
-      padding-bottom: 0.8rem;
-      background-color: #f8fafc;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 0.75rem;
-      font-size: 1.05rem;
+      padding-left: 2.75rem;
+      padding-right: 5rem;
+      padding-top: clamp(0.75rem, 1.5vw, 0.95rem);
+      padding-bottom: clamp(0.75rem, 1.5vw, 0.95rem);
+      background-color: var(--slate-50);
+      border: 1.5px solid var(--slate-200);
+      border-radius: 0.85rem;
+      /* 16px font-size equivalent on mobile prevents browser auto-zoom on iOS */
+      font-size: clamp(1rem, 2vw, 1.15rem);
       font-weight: 700;
-      color: #0f172a;
+      color: var(--slate-900);
       transition: all 0.2s ease;
+      min-height: var(--touch-target);
     }
 
     .search-input:focus {
       outline: none;
-      border-color: #0f172a;
+      border-color: #0284c7;
       background-color: #ffffff;
-      box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.1);
+      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
     }
 
     .search-icon {
       position: absolute;
-      left: 0.75rem;
+      left: 0.9rem;
       color: #94a3b8;
       pointer-events: none;
       display: flex;
@@ -246,14 +313,19 @@
       border: none;
       color: #64748b;
       cursor: pointer;
-      padding: 0.35rem;
-      border-radius: 0.5rem;
+      min-width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 0.6rem;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.15s ease;
     }
-    .icon-btn:hover { background-color: #e2e8f0; color: #0f172a; }
+    .icon-btn:hover, .icon-btn:focus-visible { 
+      background-color: var(--slate-200); 
+      color: var(--slate-900); 
+      outline: none;
+    }
     .icon-btn.recording { color: #ef4444; animation: pulse 1.2s infinite; }
 
     @keyframes pulse {
@@ -261,50 +333,64 @@
       50% { opacity: 0.6; transform: scale(1.1); }
     }
 
+    /* Shortcuts and Filter Chips */
     .shortcuts-container {
       display: flex;
       align-items: center;
       gap: 0.4rem;
       margin-top: 0.65rem;
-      font-size: 0.7rem;
+      font-size: 0.725rem;
       color: #64748b;
       overflow-x: auto;
-      padding-bottom: 0.25rem;
+      padding-bottom: 0.35rem;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
     }
 
     .chip-btn {
-      background-color: #f1f5f9;
-      color: #475569;
-      padding: 0.25rem 0.65rem;
-      border-radius: 9999px;
-      border: 1px solid #e2e8f0;
-      font-size: 0.7rem;
+      background-color: var(--slate-100);
+      color: var(--slate-700);
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.6rem;
+      border: 1px solid var(--slate-200);
+      font-size: clamp(0.65rem, 1vw, 0.75rem);
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      min-height: 2rem;
+      flex-shrink: 0;
     }
-    .chip-btn:hover, .chip-btn.active {
-      background-color: #0f172a;
+    .chip-btn:hover, .chip-btn:focus-visible, .chip-btn.active {
+      background-color: var(--slate-900);
       color: #ffffff;
-      border-color: #0f172a;
+      border-color: var(--slate-900);
+      outline: none;
     }
 
-    /* Result Card */
+    /* Result Card Component - Adaptive for all screens */
     .result-card {
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
       color: #ffffff;
-      border-radius: 1.25rem;
-      padding: 1.15rem;
-      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);
+      border-radius: 1rem;
+      padding: clamp(0.85rem, 2vw, 1.25rem);
+      box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.35);
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
+      flex-direction: column;
+      gap: 0.85rem;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      position: relative;
-      overflow: hidden;
       animation: fadeIn 0.25s ease-out;
+    }
+
+    @media (min-width: 520px) {
+      .result-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
     }
 
     @keyframes fadeIn {
@@ -313,73 +399,88 @@
     }
 
     .result-card-highlight {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 0.85rem;
-      padding: 0.65rem 0.85rem;
+      padding: 0.75rem 1rem;
       text-align: center;
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-width: 6.5rem;
+      width: 100%;
+    }
+
+    @media (min-width: 520px) {
+      .result-card-highlight {
+        width: auto;
+        min-width: 8rem;
+      }
     }
 
     .action-group {
       display: flex;
-      gap: 0.35rem;
+      gap: 0.4rem;
       width: 100%;
       margin-top: 0.5rem;
     }
 
     .copy-btn, .share-btn {
       flex: 1;
-      font-size: 0.65rem;
+      font-size: clamp(0.65rem, 1vw, 0.75rem);
       background-color: #ffffff;
-      color: #0f172a;
-      font-weight: 800;
-      padding: 0.35rem 0.4rem;
-      border-radius: 0.375rem;
+      color: var(--slate-900);
+      font-weight: 700;
+      padding: 0.45rem 0.6rem;
+      border-radius: 0.5rem;
       border: none;
       cursor: pointer;
       transition: all 0.15s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.2rem;
+      gap: 0.3rem;
+      min-height: 2rem;
     }
-    .copy-btn:hover { background-color: #f1f5f9; transform: scale(1.02); }
-    .share-btn { background-color: #10b981; color: #ffffff; }
-    .share-btn:hover { background-color: #059669; transform: scale(1.02); }
+    .copy-btn:hover, .copy-btn:focus-visible { background-color: var(--slate-100); transform: translateY(-1px); outline: none; }
+    .share-btn { background-color: var(--emerald-accent); color: #ffffff; }
+    .share-btn:hover, .share-btn:focus-visible { background-color: #059669; transform: translateY(-1px); outline: none; }
 
     .room-badge {
       margin-top: 0.5rem;
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
-      background-color: rgba(16, 185, 129, 0.2);
+      background-color: rgba(16, 185, 129, 0.15);
       color: #34d399;
-      font-size: 0.68rem;
-      font-weight: 800;
-      padding: 0.3rem 0.6rem;
-      border-radius: 0.375rem;
-      border: 1px solid rgba(52, 211, 153, 0.3);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      font-size: clamp(0.65rem, 1vw, 0.725rem);
+      font-weight: 700;
+      padding: 0.35rem 0.65rem;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      width: fit-content;
     }
 
-    /* Tabs & Dropdown Filter */
+    /* Tabs & Location Dropdown Wrapper */
     .tabs-wrapper {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid #f1f5f9;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--slate-200);
     }
 
-    @media (min-width: 640px) {
-      .tabs-wrapper {
+    .tabs-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      width: 100%;
+    }
+
+    @media (min-width: 600px) {
+      .tabs-controls {
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
@@ -388,114 +489,130 @@
 
     .tab-group {
       display: flex;
-      background-color: #f1f5f9;
+      background-color: var(--slate-100);
       padding: 0.25rem;
       border-radius: 0.75rem;
       gap: 0.25rem;
+      flex: 1;
     }
 
     .tab-btn {
       flex: 1;
-      padding: 0.45rem 0.75rem;
+      padding: 0.5rem 0.75rem;
       border-radius: 0.5rem;
-      font-size: 0.725rem;
+      font-size: clamp(0.68rem, 1vw, 0.775rem);
       font-weight: 700;
       border: none;
       cursor: pointer;
       transition: all 0.2s ease;
       background: transparent;
-      color: #64748b;
+      color: var(--slate-600);
+      min-height: 2.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .tab-btn.active {
-      background-color: #0f172a;
+      background-color: var(--slate-900);
       color: #ffffff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
     }
 
     .select-dropdown {
-      font-size: 0.75rem;
+      font-size: clamp(0.7rem, 1vw, 0.8rem);
       background-color: #ffffff;
       font-weight: 600;
-      color: #334155;
-      border: 1px solid #cbd5e1;
+      color: var(--slate-700);
+      border: 1px solid var(--slate-200);
       border-radius: 0.5rem;
-      padding: 0.45rem 0.65rem;
+      padding: 0.5rem 0.75rem;
       outline: none;
       cursor: pointer;
+      min-height: 2.1rem;
+      width: 100%;
     }
 
-    /* Table Component */
+    @media (min-width: 600px) {
+      .select-dropdown {
+        width: auto;
+        max-width: 15rem;
+      }
+    }
+
+    /* Multi-platform Table Container */
     .table-container {
-      max-height: 290px;
+      max-height: clamp(220px, 45vh, 420px);
       overflow-y: auto;
+      overflow-x: auto;
       border-radius: 0.75rem;
-      border: 1px solid #e2e8f0;
-      background-color: rgba(248, 250, 252, 0.5);
+      border: 1px solid var(--slate-200);
+      background-color: #ffffff;
+      -webkit-overflow-scrolling: touch;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
-      font-size: 0.75rem;
+      font-size: clamp(0.7rem, 1.1vw, 0.8rem);
+      min-width: 280px;
     }
 
     thead {
-      background-color: rgba(241, 245, 249, 0.95);
-      color: #64748b;
+      background-color: var(--slate-100);
+      color: var(--slate-600);
       position: sticky;
       top: 0;
       z-index: 10;
-      font-size: 0.6rem;
+      font-size: clamp(0.58rem, 0.9vw, 0.65rem);
       text-transform: uppercase;
       font-weight: 800;
       letter-spacing: 0.08em;
-      backdrop-filter: blur(4px);
     }
 
     th, td {
-      padding: 0.65rem 0.5rem;
+      padding: clamp(0.55rem, 1.2vw, 0.75rem) 0.5rem;
       text-align: center;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid var(--slate-100);
     }
 
-    th { border-right: 1px solid #e2e8f0; }
-    td { border-right: 1px solid #f1f5f9; }
+    th { border-right: 1px solid var(--slate-200); }
+    td { border-right: 1px solid var(--slate-100); }
 
     tr.location-row {
-      background-color: #f1f5f9;
-      color: #0f172a;
+      background-color: var(--slate-100);
+      color: var(--slate-900);
       font-weight: 800;
-      font-size: 0.65rem;
+      font-size: clamp(0.6rem, 0.9vw, 0.7rem);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
     tr.location-row td {
       text-align: left;
-      padding: 0.55rem 0.75rem;
+      padding: 0.6rem 0.75rem;
     }
 
     tr.match-row {
       background-color: #ecfdf5;
       color: #065f46;
       font-weight: 700;
-      position: relative;
     }
 
     td.match-cell {
-      background-color: rgba(209, 250, 229, 0.8);
+      background-color: rgba(209, 250, 229, 0.85);
       color: #047857;
       font-weight: 800;
     }
 
-    /* Modal Overlay */
+    /* Responsive Modal Overlay */
     .modal-overlay {
       position: fixed;
       inset: 0;
       background-color: rgba(15, 23, 42, 0.75);
       backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
       z-index: 100;
       display: flex;
       align-items: center;
@@ -513,10 +630,10 @@
 
     .modal-content {
       background-color: #ffffff;
-      border-radius: 1.5rem;
-      max-width: 28rem;
+      border-radius: 1.25rem;
+      max-width: clamp(18rem, 90vw, 28rem);
       width: 100%;
-      padding: 1.5rem;
+      padding: clamp(1rem, 3vw, 1.5rem);
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
       display: flex;
       flex-direction: column;
@@ -524,12 +641,12 @@
     }
 
     .btn-primary {
-      background-color: #0f172a;
+      background-color: var(--slate-900);
       color: #ffffff;
       border: none;
       padding: 0.75rem 1rem;
       border-radius: 0.75rem;
-      font-size: 0.8rem;
+      font-size: clamp(0.75rem, 1vw, 0.85rem);
       font-weight: 700;
       cursor: pointer;
       display: flex;
@@ -538,8 +655,9 @@
       gap: 0.5rem;
       transition: background-color 0.2s;
       text-decoration: none;
+      min-height: var(--touch-target);
     }
-    .btn-primary:hover { background-color: #1e293b; }
+    .btn-primary:hover, .btn-primary:focus-visible { background-color: var(--slate-700); outline: none; }
 
     .hidden { display: none !important; }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
@@ -551,22 +669,26 @@
     
     <!-- App Header -->
     <header class="app-header">
-      <div style="display: flex; align-items: center; gap: 0.6rem;">
-        <div class="tse-badge">TSE</div>
-        <div>
-          <h1 style="font-size: 0.875rem; font-weight: 700; line-height: 1.2;">Consulta de Seção Eleitoral</h1>
-          <p style="font-size: 0.625rem; color: #94a3b8; font-weight: 500; margin-top: 0.1rem;">Conversor Seção Antiga → Nova</p>
+      <div class="brand-group">
+        <div class="brand-icon-wrapper" title="Consulta de Seção Eleitoral">
+          <svg style="width: 1.2rem; height: 1.2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div class="header-titles">
+          <h1>Consulta de Seção Eleitoral</h1>
+          <p>Conversor Seção Antiga → Nova</p>
         </div>
       </div>
 
       <div class="header-actions">
         <!-- Accessibility Font Size Adjuster -->
-        <div style="display: flex; gap: 0.2rem;" title="Ajustar Tamanho do Texto">
-          <button onclick="alterarTamanhoFonte(-0.05)" class="font-btn" title="Diminuir texto">A-</button>
-          <button onclick="alterarTamanhoFonte(0.05)" class="font-btn" title="Aumentar texto">A+</button>
+        <div style="display: flex; gap: 0.25rem;" title="Ajustar Tamanho do Texto">
+          <button onclick="alterarTamanhoFonte(-0.05)" class="font-btn" title="Diminuir texto" aria-label="Diminuir texto">A-</button>
+          <button onclick="alterarTamanhoFonte(0.05)" class="font-btn" title="Aumentar texto" aria-label="Aumentar texto">A+</button>
         </div>
 
-        <button id="networkStatusBadge" onclick="abrirModalOffline()" class="status-badge online" title="Status de conexão">
+        <button id="networkStatusBadge" onclick="abrirModalOffline()" class="status-badge online" title="Status de conexão" aria-label="Status de conexão">
           <span class="status-dot green"></span>
           <span>Online</span>
         </button>
@@ -575,7 +697,6 @@
 
     <!-- App Body Container -->
     <div class="app-body">
-      <!-- TSE Direct Official Portal Link Banner -->
       <a 
         href="https://www.tse.jus.br/servicos-eleitorais/autoatendimento-eleitoral#/?id=1740416188898" 
         target="_blank" 
@@ -584,17 +705,20 @@
         id="tseExternalBanner"
         title="Consulta oficial por Nome, CPF ou Título no TSE"
       >
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <span style="font-size: 1rem;">🌐</span>
-          <span>Consultar Local por Nome/CPF no Site do TSE</span>
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <svg style="width: 1.1rem; height: 1.1rem; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+          </svg>
+          <span>Consultar por Nome / CPF no Portal Oficial do TSE</span>
         </div>
-        <span style="font-size: 0.8rem; opacity: 0.8;">↗</span>
+        <svg style="width: 0.9rem; height: 0.9rem; opacity: 0.8; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+        </svg>
       </a>
 
-      <!-- Search Input Section -->
       <div>
         <div class="input-label">
-          <span>Digite o nº da Seção (Antiga ou Atual):</span>
+          <span>Digite o número da Seção (Antiga ou Atual):</span>
           <span id="totalCounter" style="font-size: 0.65rem; color: #64748b; font-weight: 600;"></span>
         </div>
         
@@ -610,8 +734,8 @@
             autofocus
           >
           <div class="search-icon">
-            <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            <svg style="width: 1.1rem; height: 1.1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
           </div>
 
@@ -622,6 +746,7 @@
               onclick="iniciarBuscaPorVoz()" 
               class="icon-btn" 
               title="Falar número da seção"
+              aria-label="Busca por voz"
             >
               <svg style="width: 1.1rem; height: 1.1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
@@ -634,6 +759,7 @@
               onclick="limparBusca()"
               class="icon-btn hidden"
               title="Limpar busca"
+              aria-label="Limpar busca"
             >
               <svg style="width: 1.1rem; height: 1.1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
@@ -642,16 +768,28 @@
           </div>
         </div>
 
-        <!-- Shortcut Chips & Quick Filters -->
+        <!-- Professional Shortcut Chips & Quick Filters -->
         <div class="shortcuts-container custom-scrollbar">
-          <span style="font-weight: 700; font-size: 0.6rem; text-transform: uppercase;">Filtros:</span>
+          <span style="font-weight: 700; font-size: 0.6rem; text-transform: uppercase; color: #64748b; flex-shrink: 0;">Filtros:</span>
           <button onclick="definirBusca('56')" class="chip-btn">56</button>
           <button onclick="definirBusca('1')" class="chip-btn">1</button>
           <button onclick="definirBusca('81')" class="chip-btn">81</button>
-          <button onclick="filtrarPorAmbiente('Teatro')" class="chip-btn">🎭 Teatro</button>
-          <button onclick="filtrarPorAmbiente('Quadra')" class="chip-btn">🏀 Quadra</button>
-          <button onclick="filtrarPorAmbiente('Secretaria')" class="chip-btn">🏢 Secretaria</button>
-          <button onclick="filtrarPorAmbiente('Z36')" class="chip-btn">⭐ Zona 036</button>
+          <button onclick="filtrarPorAmbiente('Teatro')" class="chip-btn">
+            <svg style="width: 0.8rem; height: 0.8rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            Teatro
+          </button>
+          <button onclick="filtrarPorAmbiente('Quadra')" class="chip-btn">
+            <svg style="width: 0.8rem; height: 0.8rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2h1.5a2.5 2.5 0 002.5-2.5V11m-12.8 0A9 9 0 1121 12"></path></svg>
+            Quadra
+          </button>
+          <button onclick="filtrarPorAmbiente('Secretaria')" class="chip-btn">
+            <svg style="width: 0.8rem; height: 0.8rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            Secretaria
+          </button>
+          <button onclick="filtrarPorAmbiente('Z36')" class="chip-btn">
+            <svg style="width: 0.8rem; height: 0.8rem; color: #f59e0b;" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+            Zona 036
+          </button>
         </div>
       </div>
 
@@ -662,8 +800,8 @@
 
       <!-- Tabs & Location Filters -->
       <div class="tabs-wrapper">
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; width: 100%;">
-          <div class="tab-group" style="flex: 1;">
+        <div class="tabs-controls">
+          <div class="tab-group">
             <button 
               id="tabPrincipais" 
               onclick="mudarAba('principais')" 
@@ -679,8 +817,8 @@
               Outros Locais
             </button>
           </div>
-          <select id="locationSelect" onchange="renderizarTabela(this.value)" class="select-dropdown">
-            <!-- Dynamically populated based on active tab -->
+          <select id="locationSelect" onchange="renderizarTabela(this.value)" class="select-dropdown" aria-label="Filtrar por local">
+            <!-- Populated dynamically -->
           </select>
         </div>
       </div>
@@ -701,16 +839,17 @@
           </tbody>
         </table>
       </div>
-      <div style="font-size: 0.65rem; color: #64748b; font-weight: 600; font-style: italic; display: flex; align-items: center; gap: 0.25rem; margin-top: 0.35rem; padding-left: 0.25rem;">
+      <div style="font-size: 0.65rem; color: #64748b; font-weight: 600; font-style: italic; display: flex; align-items: center; gap: 0.25rem; padding-left: 0.25rem;">
         <span>* Seções pertencentes à antiga Zona 036.</span>
       </div>
     </div>
 
     <!-- Mini Footer -->
-    <footer style="background-color: rgba(248, 250, 252, 0.9); padding: 0.75rem; text-align: center; font-size: 0.65rem; color: #94a3b8; border-top: 1px solid #f1f5f9; font-weight: 500; display: flex; justify-content: space-between; align-items: center; padding-left: 1.25rem; padding-right: 1.25rem;">
+    <footer style="background-color: var(--slate-50); padding: 0.75rem 1.25rem; text-align: center; font-size: 0.65rem; color: #94a3b8; border-top: 1px solid var(--slate-200); font-weight: 500; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
       <span>Base TSE Offline v3.0</span>
-      <button onclick="abrirModalOffline()" style="background: none; border: none; color: #475569; font-size: 0.65rem; font-weight: 700; cursor: pointer; text-decoration: underline;">
-        ⚡ Instalar / Usar Offline
+      <button onclick="abrirModalOffline()" style="background: none; border: none; color: #475569; font-size: 0.65rem; font-weight: 700; cursor: pointer; text-decoration: underline; display: flex; align-items: center; gap: 0.3rem;">
+        <svg style="width: 0.8rem; height: 0.8rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+        Instalar / Usar Offline
       </button>
     </footer>
   </div>
@@ -720,14 +859,14 @@
     <div class="modal-content" onclick="event.stopPropagation()">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <h3 style="font-size: 1rem; font-weight: 800; color: #0f172a;">Usar sem Internet no Celular</h3>
-        <button onclick="fecharModalOffline()" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">&times;</button>
+        <button onclick="fecharModalOffline()" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;" aria-label="Fechar">&times;</button>
       </div>
 
       <p style="font-size: 0.75rem; color: #475569; line-height: 1.4;">
         Este aplicativo é <strong>100% autônomo</strong>. Você pode salvá-lo no celular e usá-lo no dia da votação sem sinal de internet ou Wi-Fi.
       </p>
 
-      <div style="background-color: #f8fafc; padding: 0.85rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 0.5rem;">
+      <div style="background-color: var(--slate-50); padding: 0.85rem; border-radius: 0.75rem; border: 1px solid var(--slate-200); display: flex; flex-direction: column; gap: 0.5rem;">
         <span style="font-size: 0.7rem; font-weight: 800; color: #0f172a; text-transform: uppercase;">Como Salvar no Celular:</span>
         <div style="font-size: 0.7rem; color: #334155; line-height: 1.4;">
           <strong>No Android (Chrome):</strong> Toque no menu (<strong>⋮</strong>) e escolha <em>"Adicionar à tela inicial"</em>.
@@ -877,15 +1016,13 @@
         if ('vibrate' in navigator && typeof navigator.vibrate === 'function') {
           navigator.vibrate([15]);
         }
-      } catch (e) {
-        // Fallback safe for devices without vibration
-      }
+      } catch (e) {}
     }
 
     function alterarTamanhoFonte(delta) {
       acionarVibracao();
       currentFontScale = Math.min(Math.max(currentFontScale + delta, 0.85), 1.25);
-      document.documentElement.style.setProperty('--font-scale', `${currentFontScale}rem`);
+      document.documentElement.style.setProperty('--font-scale', `${currentFontScale}`);
     }
 
     function eLocalPrincipal(localName) {
@@ -1007,13 +1144,14 @@
       if (resultados.length === 0) {
         if (resultsContent) {
           resultsContent.innerHTML = `
-            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; color: #334155; padding: 1rem; border-radius: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
-              <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: 600;">
-                <span style="color: #64748b; font-size: 1rem;">⚠️️</span>
-                <span>Seção <strong style="color: #0f172a;">"${query}"</strong> não consta na lista local.</span>
+            <div style="background-color: var(--slate-50); border: 1px solid var(--slate-200); color: #334155; padding: 1.1rem; border-radius: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+              <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; font-weight: 600;">
+                <svg style="width: 1.1rem; height: 1.1rem; color: #f59e0b; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <span>Seção <strong style="color: #0f172a;">"${query}"</strong> não consta na relação local.</span>
               </div>
               <a href="https://www.tse.jus.br/servicos-eleitorais/autoatendimento-eleitoral#/?id=1740416188898" target="_blank" rel="noopener noreferrer" class="btn-primary" style="background-color: #0284c7; text-decoration: none;">
-                🔍 Consultar diretamente no Site Oficial do TSE ↗
+                <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                Consultar no Portal Oficial do TSE
               </a>
             </div>
           `;
@@ -1026,22 +1164,25 @@
           const isZona36 = item.a1 !== null && SECOES_ZONA_036.has(item.a1);
           const ambienteHtml = ambiente 
             ? `<div class="room-badge">
-                 📍 ${ambiente}
+                 <svg style="width: 0.8rem; height: 0.8rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                 <span>${ambiente}</span>
                </div>`
             : '';
           const zona36Html = isZona36
-            ? `<div style="font-size: 0.65rem; color: #fbbf24; font-weight: 700; margin-top: 0.2rem; display: flex; align-items: center; gap: 0.2rem;">
-                 ⭐ Antiga Zona 036
+            ? `<div style="font-size: 0.65rem; color: #fbbf24; font-weight: 700; margin-top: 0.2rem; display: flex; align-items: center; gap: 0.3rem;">
+                 <svg style="width: 0.75rem; height: 0.75rem;" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                 <span>Antiga Zona 036</span>
                </div>`
             : '';
 
           html += `
             <div class="result-card">
               <div style="display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; flex: 1;">
-                <span style="font-size: 0.65rem; text-transform: uppercase; font-weight: 800; color: #cbd5e1; letter-spacing: 0.05em;">
-                  🏢 ${res.local}
+                <span style="font-size: 0.65rem; text-transform: uppercase; font-weight: 800; color: #cbd5e1; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.3rem;">
+                  <svg style="width: 0.8rem; height: 0.8rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                  ${res.local}
                 </span>
-                <div style="font-size: 0.725rem; color: #94a3b8; font-weight: 500; display: flex; gap: 0.5rem;">
+                <div style="font-size: 0.725rem; color: #94a3b8; font-weight: 500; display: flex; gap: 0.5rem; flex-wrap: wrap;">
                   <span>Ant.1: <strong style="color: #f8fafc;">${item.a1 !== null ? item.a1 + (isZona36 ? '*' : '') : '—'}</strong></span>
                   <span style="opacity: 0.4;">|</span>
                   <span>Ant.2: <strong style="color: #f8fafc;">${item.a2 ?? '—'}</strong></span>
@@ -1052,7 +1193,7 @@
 
               <div class="result-card-highlight">
                 <span style="font-size: 0.55rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #cbd5e1;">SEÇÃO ATUAL</span>
-                <span class="mono" style="font-size: 1.85rem; font-weight: 900; color: #ffffff; line-height: 1;">${item.atual}</span>
+                <span class="mono" style="font-size: var(--fluid-mono); font-weight: 900; color: #ffffff; line-height: 1;">${item.atual}</span>
                 
                 <div class="action-group">
                   <button 
@@ -1060,14 +1201,15 @@
                     class="copy-btn"
                     title="Copiar texto"
                   >
-                    📋 Copiar
+                    <svg style="width: 0.75rem; height: 0.75rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                    Copiar
                   </button>
                   <button 
                     onclick="compartilharResultado('${res.local}', '${item.a1 ?? '—'}', '${item.a2 ?? '—'}', '${item.atual}', '${ambiente ?? ''}')"
                     class="share-btn"
                     title="Compartilhar"
                   >
-                    📲
+                    <svg style="width: 0.75rem; height: 0.75rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                   </button>
                 </div>
               </div>
@@ -1147,7 +1289,7 @@
           }
 
           const displayA1 = row.a1 !== null 
-            ? `${row.a1}${isZ36 ? '<span style="color:#eab308; font-weight:bold;" title="Antiga Zona 036">*</span>' : ''}` 
+            ? `${row.a1}${isZ36 ? '<span style="color:#f59e0b; font-weight:bold;" title="Antiga Zona 036">*</span>' : ''}` 
             : '<span style="color:#cbd5e1; font-family:sans-serif;">—</span>';
 
           tr.innerHTML = `
@@ -1253,7 +1395,7 @@
 
     function exibirToast(msg) {
       const toast = document.createElement('div');
-      toast.style.cssText = 'position:fixed; bottom:1.25rem; left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; font-size:0.75rem; padding:0.6rem 1.2rem; border-radius:9999px; box-shadow:0 10px 20px rgba(0,0,0,0.4); z-index:999; font-weight:700; border:1px solid #334155; animation: fadeIn 0.2s ease-out; pointer-events:none;';
+      toast.style.cssText = 'position:fixed; bottom:1.25rem; left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; font-size:0.75rem; padding:0.6rem 1.2rem; border-radius:9999px; box-shadow:0 10px 20px rgba(0,0,0,0.4); z-index:999; font-weight:700; border:1px solid #334155; animation: fadeIn 0.2s ease-out; pointer-events:none; text-align:center; max-width: 90vw;';
       toast.innerHTML = msg;
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 2200);
@@ -1318,7 +1460,7 @@
         atualizarStatusConexao();
         mudarAba('principais');
       } catch (err) {
-        console.error("Erro ao inicializar base de dados:", err);
+        console.error("Erro ao inicializar aplicativo:", err);
       }
     }
 
