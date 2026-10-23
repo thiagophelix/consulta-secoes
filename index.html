@@ -401,12 +401,58 @@
       color: #ffffff;
       border-radius: 1rem;
       padding: clamp(0.85rem, 2vw, 1.25rem);
-      box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.35);
+      box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.5), 0 0 0 2px var(--accent-primary);
       display: flex;
       flex-direction: column;
       gap: 0.85rem;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      animation: fadeIn 0.25s ease-out;
+      border: none;
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @media (min-width: 520px) {
+      .result-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: translateY(15px) scale(0.95); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .result-card-highlight {
+      background: linear-gradient(135deg, var(--emerald-accent) 0%, #047857 100%);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 0.85rem;
+      padding: 1rem;
+      text-align: center;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card-highlight::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.25), transparent);
+      transform: skewX(-20deg);
+      animation: shine 2.5s infinite;
+    }
+
+    @keyframes shine {
+      0% { left: -100%; }
+      20% { left: 200%; }
+      100% { left: 200%; }
     }
 
     @media (min-width: 520px) {
@@ -927,6 +973,7 @@
           { a1: 91,   a2: 56,  atual: 506 },
           { a1: null, a2: 98,  atual: 507 },
           { a1: null, a2: 101, atual: 508 },
+          { a1: null, a2: 107, atual: 509 },
           { a1: null, a2: 109, atual: 510 },
           { a1: null, a2: 119, atual: 511 },
           { a1: null, a2: 139, atual: 512 },
@@ -1020,9 +1067,9 @@
       496: "Secretaria Térreo", 511: "Secretaria Térreo",
       497: "Secr. 2º Andar", 498: "Secr. 2º Andar", 499: "Secr. 2º Andar", 500: "Secr. 2º Andar", 501: "Secr. 2º Andar", 502: "Secr. 2º Andar",
       507: "Teatro", 550: "Teatro",
-      513: "Quadra", 546: "Quadra",
-      548: "Sala de Luta", 549: "Sala de Luta",
-      551: "Sala de Pilates", 552: "Sala de Pilates", 626: "Sala de Pilates",
+      513: "Quadra", 546: "Quadra", 548: "Quadra", 549: "Quadra",
+      551: "Teatro (Externo)", 552: "Teatro (Externo)",
+      626: "Teatro (Mezanino)",
       547: "Academia",
       503: "Administração", 504: "Administração", 505: "Administração", 506: "Administração", 508: "Administração", 509: "Administração", 510: "Administração", 512: "Administração"
     };
@@ -1216,24 +1263,29 @@
               </div>
 
               <div class="result-card-highlight">
-                <span style="font-size: 0.55rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #cbd5e1;">SEÇÃO ATUAL</span>
-                <span class="mono" style="font-size: var(--fluid-mono); font-weight: 900; color: #ffffff; line-height: 1;">${item.atual}</span>
+                <span style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #d1fae5; display: flex; align-items: center; gap: 0.3rem; z-index: 1;">
+                  <svg style="width: 0.85rem; height: 0.85rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  SEÇÃO ATUAL
+                </span>
+                <span class="mono" style="font-size: clamp(2.5rem, 8vw + 1rem, 3.5rem); font-weight: 900; color: #ffffff; line-height: 1.1; text-shadow: 0 3px 6px rgba(0,0,0,0.25); margin: 0.35rem 0; z-index: 1;">${item.atual}</span>
                 
-                <div class="action-group">
+                <div class="action-group" style="z-index: 1;">
                   <button 
                     onclick="copiarSimples('${res.local}', '${item.a1 ?? '—'}', '${item.a2 ?? '—'}', '${item.atual}', '${ambiente ?? ''}')"
                     class="copy-btn"
                     title="Copiar texto"
+                    style="color: #047857; font-weight: 800;"
                   >
-                    <svg style="width: 0.75rem; height: 0.75rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                    <svg style="width: 0.85rem; height: 0.85rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
                     Copiar
                   </button>
                   <button 
                     onclick="compartilharResultado('${res.local}', '${item.a1 ?? '—'}', '${item.a2 ?? '—'}', '${item.atual}', '${ambiente ?? ''}')"
                     class="share-btn"
                     title="Compartilhar"
+                    style="background-color: #065f46; color: #ffffff; border: 1px solid rgba(255,255,255,0.3);"
                   >
-                    <svg style="width: 0.75rem; height: 0.75rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                    <svg style="width: 0.85rem; height: 0.85rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                   </button>
                 </div>
               </div>
