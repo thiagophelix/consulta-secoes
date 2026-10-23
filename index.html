@@ -2,934 +2,878 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <!-- Optimized viewport for multi-device responsiveness and native mobile notch handling -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-  <title>Consulta Rápida de Seção Eleitoral</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Consulta de Seção</title>
 
   <!-- PWA & Mobile Capabilities -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Seções Eleitorais">
-  <meta name="theme-color" content="#0b132b">
+  <meta name="apple-mobile-web-app-title" content="Eleições">
+  <meta name="theme-color" content="#09090b">
 
   <style>
+    /* 
+      DESIGN SYSTEM - PREMIUM DARK MODE 
+      Inspirado em interfaces nativas modernas (iOS/Material 3) e Glassmorphism
+    */
     :root {
       --font-scale: 1;
-      /* Dynamic fluid typography */
-      --fluid-title: clamp(0.95rem, 2vw + 0.5rem, 1.35rem);
-      --fluid-body: clamp(0.8rem, 1.2vw + 0.4rem, 0.95rem);
-      --fluid-mono: clamp(1.5rem, 4vw + 0.5rem, 2.25rem);
       
-      --bg-dark: #0b132b;
-      --card-bg: #ffffff;
-      --accent-primary: #0284c7;
-      --accent-hover: #0369a1;
-      --emerald-accent: #10b981;
-      --amber-accent: #f59e0b;
-      --slate-50: #f8fafc;
-      --slate-100: #f1f5f9;
-      --slate-200: #e2e8f0;
-      --slate-600: #475569;
-      --slate-700: #334155;
-      --slate-900: #0f172a;
-
-      /* Touch target standard size */
-      --touch-target: 2.75rem;
+      /* Cores de Fundo e Superfície */
+      --bg-base: #09090b; /* Quase preto */
+      --bg-surface: #18181b;
+      --bg-surface-elevated: #27272a;
+      
+      /* Vidro e Bordas */
+      --glass-bg: rgba(24, 24, 27, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-highlight: rgba(255, 255, 255, 0.12);
+      
+      /* Textos */
+      --text-primary: #f8fafc;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      
+      /* Cores de Destaque */
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-glow: rgba(59, 130, 246, 0.25);
+      
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.2);
+      --success-bg: rgba(16, 185, 129, 0.1);
+      
+      --warning: #f59e0b;
+      
+      /* Layout */
+      --app-max-width: 480px;
+      --border-radius-sm: 8px;
+      --border-radius-md: 16px;
+      --border-radius-lg: 24px;
+      --border-radius-pill: 999px;
     }
 
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
 
     html {
       font-size: calc(16px * var(--font-scale));
       -webkit-text-size-adjust: 100%;
-      text-size-adjust: 100%;
+      background-color: var(--bg-base);
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background: radial-gradient(circle at top, #1e293b 0%, #0f172a 60%, #0b132b 100%);
-      color: var(--slate-900);
-      /* Safe viewport height handling for mobile browsers (dvh with vh fallback) */
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
       min-height: 100vh;
       min-height: 100dvh;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
-      /* Handle iPhone notch and safe areas on mobile devices */
-      padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
-      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       overflow-x: hidden;
     }
 
-    /* Scrollbar Optimization */
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: var(--slate-100);
-      border-radius: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
+    /* Ocultar scrollbar nativa para design mais limpo */
+    ::-webkit-scrollbar { width: 0px; background: transparent; }
 
-    /* Multi-platform Responsive Card Container */
-    .app-card {
+    /* Container Principal - Simula um App Nativo */
+    .app-container {
       width: 100%;
-      max-width: clamp(20rem, 95vw, 48rem);
-      background-color: var(--card-bg);
-      border-radius: clamp(0.85rem, 2vw, 1.5rem);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
-      overflow: hidden;
+      max-width: var(--app-max-width);
+      min-height: 100dvh;
+      background: radial-gradient(circle at 50% 0%, #1c1c22 0%, var(--bg-base) 60%);
       display: flex;
       flex-direction: column;
-      margin: auto;
-      transition: max-width 0.3s ease, border-radius 0.3s ease;
+      position: relative;
+      box-shadow: 0 0 40px rgba(0,0,0,0.5);
     }
 
-    /* Responsive Header Component */
+    /* Header Fixo com Efeito Vidro (Glassmorphism) */
     .app-header {
-      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-      color: #ffffff;
-      padding: clamp(0.75rem, 2vw, 1.25rem) clamp(0.85rem, 2.5vw, 1.5rem);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: max(1rem, env(safe-area-inset-top)) 1.25rem 1rem;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 0.75rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      flex-wrap: wrap;
     }
 
-    .brand-group {
+    .brand {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      min-width: 0;
-      flex: 1 1 auto;
     }
 
-    .brand-icon-wrapper {
-      width: clamp(2rem, 4vw, 2.5rem);
-      height: clamp(2rem, 4vw, 2.5rem);
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      border-radius: 0.65rem;
+    .brand-icon {
+      width: 2.25rem;
+      height: 2.25rem;
+      background: linear-gradient(135deg, var(--accent), #1d4ed8);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #ffffff;
-      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
-      flex-shrink: 0;
+      color: white;
+      box-shadow: 0 4px 12px var(--accent-glow);
     }
 
-    .header-titles {
-      min-width: 0;
-      flex: 1;
+    .brand-title {
+      display: flex;
+      flex-direction: column;
     }
 
-    .header-titles h1 {
-      font-size: var(--fluid-title);
-      font-weight: 800;
+    .brand-title h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
       line-height: 1.2;
-      letter-spacing: -0.01em;
-      white-space: normal;
-      word-break: break-word;
     }
 
-    .header-titles p {
-      font-size: clamp(0.6rem, 1vw, 0.75rem);
-      color: #94a3b8;
+    .brand-title p {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
       font-weight: 500;
-      margin-top: 0.1rem;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      flex-shrink: 0;
     }
 
-    /* Regra responsiva dedicada para telas menores / celulares */
-    @media (max-width: 520px) {
-      .app-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.65rem;
-      }
-
-      .brand-group {
-        width: 100%;
-      }
-
-      .header-actions {
-        width: 100%;
-        justify-content: space-between;
-        padding-top: 0.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-      }
-    }
-
-    .font-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: #cbd5e1;
-      font-size: 0.75rem;
-      font-weight: 700;
-      min-width: 2.2rem;
-      height: 2.2rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
+    .icon-button {
+      background: var(--glass-border);
+      border: 1px solid var(--glass-highlight);
+      color: var(--text-primary);
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.15s ease;
-    }
-    .font-btn:hover, .font-btn:focus-visible {
-      background: rgba(255, 255, 255, 0.2);
-      color: #fff;
-      outline: none;
-    }
-
-    .status-badge {
-      font-size: clamp(0.6rem, 1vw, 0.7rem);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 0.4rem 0.75rem;
-      border-radius: 9999px;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
       cursor: pointer;
       transition: all 0.2s ease;
-      height: 2.2rem;
-      border: none;
     }
-
-    .status-badge.online {
-      background-color: rgba(16, 185, 129, 0.12);
-      color: #34d399;
-      border: 1px solid rgba(52, 211, 153, 0.25);
-    }
-
-    .status-badge.offline {
-      background-color: rgba(245, 158, 11, 0.12);
-      color: #fbbf24;
-      border: 1px solid rgba(251, 191, 36, 0.25);
-    }
+    .icon-button:active { transform: scale(0.92); background: var(--glass-highlight); }
 
     .status-dot {
-      width: 7px;
-      height: 7px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      flex-shrink: 0;
+      background-color: var(--success);
+      box-shadow: 0 0 8px var(--success);
     }
-    .status-dot.green { background-color: #34d399; box-shadow: 0 0 6px #34d399; }
-    .status-dot.orange { background-color: #fbbf24; box-shadow: 0 0 6px #fbbf24; }
+    .status-dot.offline {
+      background-color: var(--warning);
+      box-shadow: 0 0 8px var(--warning);
+    }
 
-    /* App Body */
-    .app-body {
-      padding: clamp(0.85rem, 2.5vw, 1.5rem);
+    /* Corpo do App */
+    .app-content {
+      padding: 1.25rem;
       display: flex;
       flex-direction: column;
-      gap: clamp(0.85rem, 2vw, 1.25rem);
+      gap: 1.5rem;
+      flex: 1;
+      padding-bottom: max(2rem, env(safe-area-inset-bottom));
     }
 
-    /* Official External Banner */
-    .tse-official-link {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      border: 1px solid rgba(2, 132, 199, 0.35);
-      color: #38bdf8;
-      border-radius: 0.85rem;
-      padding: clamp(0.65rem, 1.5vw, 0.85rem) clamp(0.85rem, 2vw, 1.15rem);
+    /* Banner TSE Elegante */
+    .tse-banner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 0.6rem;
-      font-size: clamp(0.7rem, 1.2vw, 0.825rem);
-      font-weight: 600;
+      padding: 0.875rem 1rem;
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: var(--border-radius-md);
       text-decoration: none;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
-      min-height: var(--touch-target);
+      color: #60a5fa;
+      transition: all 0.2s;
     }
-    .tse-official-link:hover, .tse-official-link:focus-visible {
-      border-color: #38bdf8;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.25);
-      outline: none;
-    }
-
-    /* Inputs and Controls */
-    .input-label {
+    .tse-banner:active { transform: scale(0.98); background: rgba(59, 130, 246, 0.15); }
+    .tse-banner-text {
+      font-size: 0.8rem;
+      font-weight: 600;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      font-size: clamp(0.7rem, 1.1vw, 0.8rem);
-      font-weight: 600;
-      color: var(--slate-600);
-      margin-bottom: 0.4rem;
-      flex-wrap: wrap;
-      gap: 0.25rem;
+      gap: 0.5rem;
     }
 
-    .search-wrapper {
+    /* Seção de Busca (Pill UI) */
+    .search-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .search-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      padding-left: 0.25rem;
+    }
+
+    .search-input-wrapper {
       position: relative;
       display: flex;
       align-items: center;
-      width: 100%;
     }
 
     .search-input {
       width: 100%;
-      padding-left: 2.75rem;
-      padding-right: 5rem;
-      padding-top: clamp(0.75rem, 1.5vw, 0.95rem);
-      padding-bottom: clamp(0.75rem, 1.5vw, 0.95rem);
-      background-color: var(--slate-50);
-      border: 1.5px solid var(--slate-200);
-      border-radius: 0.85rem;
-      /* 16px font-size equivalent on mobile prevents browser auto-zoom on iOS */
-      font-size: clamp(1rem, 2vw, 1.15rem);
-      font-weight: 700;
-      color: var(--slate-900);
-      transition: all 0.2s ease;
-      min-height: var(--touch-target);
+      height: 3.5rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius-lg);
+      padding: 0 4rem 0 3rem;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      transition: all 0.25s ease;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
     }
-
+    .search-input::placeholder { color: var(--text-muted); font-weight: 500; }
     .search-input:focus {
       outline: none;
-      border-color: #0284c7;
-      background-color: #ffffff;
-      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
+      border-color: var(--accent);
+      background: var(--bg-surface-elevated);
+      box-shadow: 0 0 0 4px var(--accent-glow), inset 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    .search-icon {
+    .search-icon-left {
       position: absolute;
-      left: 0.9rem;
-      color: #94a3b8;
+      left: 1rem;
+      color: var(--text-muted);
       pointer-events: none;
-      display: flex;
-      align-items: center;
     }
 
-    .input-actions {
+    .search-actions-right {
       position: absolute;
       right: 0.5rem;
       display: flex;
-      align-items: center;
       gap: 0.25rem;
     }
 
-    .icon-btn {
+    .mic-button {
       background: transparent;
       border: none;
-      color: #64748b;
-      cursor: pointer;
-      min-width: 2.25rem;
-      height: 2.25rem;
-      border-radius: 0.6rem;
+      color: var(--text-secondary);
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.15s ease;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-    .icon-btn:hover, .icon-btn:focus-visible { 
-      background-color: var(--slate-200); 
-      color: var(--slate-900); 
-      outline: none;
-    }
-    .icon-btn.recording { color: #ef4444; animation: pulse 1.2s infinite; }
+    .mic-button:active { background: var(--glass-border); color: var(--text-primary); }
+    .mic-button.recording { color: #ef4444; animation: pulse 1.5s infinite; background: rgba(239, 68, 68, 0.1); }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.6; transform: scale(1.1); }
-    }
-
-    /* Shortcuts and Filter Chips */
-    .shortcuts-container {
+    .clear-button {
+      background: var(--glass-border);
+      border: none;
+      color: var(--text-secondary);
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
-      margin-top: 0.65rem;
-      font-size: 0.725rem;
-      color: #64748b;
-      overflow-x: auto;
-      padding-bottom: 0.35rem;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
+      justify-content: center;
+      cursor: pointer;
+      margin-right: 0.5rem;
     }
 
-    .chip-btn {
-      background-color: var(--slate-100);
-      color: var(--slate-700);
-      padding: 0.35rem 0.75rem;
-      border-radius: 0.6rem;
-      border: 1px solid var(--slate-200);
-      font-size: clamp(0.65rem, 1vw, 0.75rem);
+    /* Chips Horizontais */
+    .chip-scroll {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      -webkit-overflow-scrolling: touch;
+      margin: 0 -1.25rem;
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+    }
+    
+    .chip {
+      background: var(--bg-surface);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+      padding: 0.4rem 0.875rem;
+      border-radius: var(--border-radius-pill);
+      font-size: 0.75rem;
       font-weight: 600;
-      cursor: pointer;
       white-space: nowrap;
-      transition: all 0.15s ease;
-      display: inline-flex;
+      cursor: pointer;
+      display: flex;
       align-items: center;
       gap: 0.35rem;
-      min-height: 2rem;
-      flex-shrink: 0;
+      transition: all 0.2s;
     }
-    .chip-btn:hover, .chip-btn:focus-visible, .chip-btn.active {
-      background-color: var(--slate-900);
-      color: #ffffff;
-      border-color: var(--slate-900);
-      outline: none;
+    .chip:active { transform: scale(0.95); }
+    .chip.active, .chip:hover {
+      background: var(--text-primary);
+      color: var(--bg-base);
+      border-color: var(--text-primary);
     }
+    .chip.chip-z36 { border-color: rgba(245, 158, 11, 0.3); color: var(--warning); }
+    .chip.chip-z36.active { background: var(--warning); color: #000; border-color: var(--warning); }
 
-    /* Result Card Component - Adaptive for all screens */
-    .result-card {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      color: #ffffff;
-      border-radius: 1rem;
-      padding: clamp(1rem, 2.5vw, 1.5rem);
-      box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.5), 0 0 0 2px var(--accent-primary);
+    /* ---------------------------------------------------
+       CARTÃO DE RESULTADO - "O DIGITAL PASS"
+       --------------------------------------------------- */
+    .result-pass {
+      background: linear-gradient(145deg, var(--bg-surface-elevated), var(--bg-surface));
+      border: 1px solid var(--glass-highlight);
+      border-radius: var(--border-radius-lg);
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      border: none;
-      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    }
-
-    @media (min-width: 520px) {
-      .result-card {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-      }
-    }
-
-    @keyframes popIn {
-      0% { opacity: 0; transform: translateY(15px) scale(0.95); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .result-card-highlight {
-      background: linear-gradient(135deg, var(--emerald-accent) 0%, #047857 100%);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-radius: 0.85rem;
-      padding: 1.25rem 1rem;
-      text-align: center;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
+      gap: 1.25rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+      animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       position: relative;
       overflow: hidden;
     }
 
-    .result-card-highlight::before {
+    /* Brilho de fundo sutil */
+    .result-pass::before {
       content: '';
       position: absolute;
-      top: 0; left: -100%; width: 50%; height: 100%;
-      background: linear-gradient(to right, transparent, rgba(255,255,255,0.25), transparent);
-      transform: skewX(-20deg);
-      animation: shine 2.5s infinite;
+      top: 0; right: 0; width: 150px; height: 150px;
+      background: var(--success);
+      filter: blur(80px);
+      opacity: 0.1;
+      pointer-events: none;
     }
 
-    @keyframes shine {
-      0% { left: -100%; }
-      20% { left: 200%; }
-      100% { left: 200%; }
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    @media (min-width: 520px) {
-      .result-card-highlight {
-        width: auto;
-        min-width: 10rem;
-      }
-    }
-
-    .action-group {
+    .pass-header {
       display: flex;
-      gap: 0.4rem;
-      width: 100%;
-      margin-top: 0.75rem;
+      align-items: flex-start;
+      gap: 0.75rem;
     }
 
-    .copy-btn, .share-btn {
-      flex: 1;
-      font-size: clamp(0.65rem, 1vw, 0.75rem);
-      background-color: #ffffff;
-      color: var(--slate-900);
-      font-weight: 700;
-      padding: 0.45rem 0.6rem;
-      border-radius: 0.5rem;
-      border: none;
-      cursor: pointer;
-      transition: all 0.15s ease;
+    .pass-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: rgba(59, 130, 246, 0.1);
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.3rem;
-      min-height: 2.2rem;
+      color: #60a5fa;
+      flex-shrink: 0;
     }
-    .copy-btn:hover, .copy-btn:focus-visible { background-color: var(--slate-100); transform: translateY(-1px); outline: none; }
-    .share-btn { background-color: var(--emerald-accent); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); }
-    .share-btn:hover, .share-btn:focus-visible { background-color: #059669; transform: translateY(-1px); outline: none; }
 
-    /* New Room Badge Styling - Bigger and Brighter */
-    .room-badge {
+    .pass-local {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .pass-local h2 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .pass-old-sections {
+      display: flex;
+      gap: 0.5rem;
       margin-top: 0.25rem;
+    }
+
+    .old-badge {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .old-badge strong { color: #fff; font-size: 0.85rem; font-family: ui-monospace, monospace; }
+    .star-z36 { color: var(--warning); font-size: 1rem; line-height: 0; }
+
+    .pass-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+      width: 100%;
+    }
+
+    .pass-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pass-atual-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--success);
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .pass-number {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      text-shadow: 0 4px 20px var(--success-glow);
+    }
+
+    .pass-room {
+      background: var(--success-bg);
+      border: 1px solid var(--success-glow);
+      padding: 0.6rem 1rem;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
+    }
+
+    .pass-room-label { font-size: 0.65rem; color: #6ee7b7; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.1rem; }
+    .pass-room-name { font-size: 0.9rem; color: #fff; font-weight: 700; }
+
+    .pass-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .action-btn {
+      flex: 1;
+      height: 3rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    
+    .btn-copy {
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      border: 1px solid var(--glass-border);
+    }
+    .btn-copy:active { background: rgba(255,255,255,0.1); transform: scale(0.97); }
+
+    .btn-share {
+      background: var(--success);
+      color: #000;
+    }
+    .btn-share:active { background: #059669; transform: scale(0.97); }
+
+    /* Estado de Erro / Não Encontrado */
+    .not-found-card {
+      background: rgba(245, 158, 11, 0.05);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: var(--border-radius-lg);
+      padding: 1.5rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      animation: slideUpFade 0.3s ease;
+    }
+    .not-found-card p { font-size: 0.9rem; color: #d4d4d8; line-height: 1.4; }
+    .not-found-card strong { color: #fff; }
+    
+    .btn-tse-primary {
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--border-radius-sm);
+      font-weight: 600;
+      font-size: 0.85rem;
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      background-color: rgba(16, 185, 129, 0.18);
-      color: #6ee7b7;
-      font-size: clamp(0.8rem, 1.5vw, 0.95rem);
-      font-weight: 800;
-      padding: 0.4rem 0.85rem;
-      border-radius: 0.5rem;
-      border: 1px solid rgba(52, 211, 153, 0.4);
-      width: fit-content;
-      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+      gap: 0.5rem;
+      width: 100%;
+      justify-content: center;
     }
 
-    /* Tabs & Location Dropdown Wrapper */
-    .tabs-wrapper {
+    /* ---------------------------------------------------
+       SEGMENTED CONTROL (Abas estilo iOS) & TABELA
+       --------------------------------------------------- */
+    .list-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .list-header {
+      padding: 1rem;
+      border-bottom: 1px solid var(--glass-border);
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-      padding-top: 0.5rem;
-      border-top: 1px solid var(--slate-200);
     }
 
-    .tabs-controls {
+    .segmented-control {
       display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      width: 100%;
+      background: rgba(0,0,0,0.2);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
     }
 
-    @media (min-width: 600px) {
-      .tabs-controls {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-      }
-    }
-
-    .tab-group {
-      display: flex;
-      background-color: var(--slate-100);
-      padding: 0.25rem;
-      border-radius: 0.75rem;
-      gap: 0.25rem;
+    .segment-btn {
       flex: 1;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 0.5rem 0.75rem;
-      border-radius: 0.5rem;
-      font-size: clamp(0.68rem, 1vw, 0.775rem);
-      font-weight: 700;
+      background: transparent;
       border: none;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.5rem 0;
+      border-radius: 6px;
       cursor: pointer;
       transition: all 0.2s ease;
-      background: transparent;
-      color: var(--slate-600);
-      min-height: 2.1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    }
+    .segment-btn.active {
+      background: var(--glass-highlight);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
-    .tab-btn.active {
-      background-color: var(--slate-900);
-      color: #ffffff;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
-    }
-
-    .select-dropdown {
-      font-size: clamp(0.7rem, 1vw, 0.8rem);
-      background-color: #ffffff;
-      font-weight: 600;
-      color: var(--slate-700);
-      border: 1px solid var(--slate-200);
-      border-radius: 0.5rem;
-      padding: 0.5rem 0.75rem;
+    .custom-select {
+      background: var(--bg-surface-elevated);
+      color: #fff;
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 500;
       outline: none;
-      cursor: pointer;
-      min-height: 2.1rem;
       width: 100%;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/200.0/svg' width='16' height='16' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
     }
 
-    @media (min-width: 600px) {
-      .select-dropdown {
-        width: auto;
-        max-width: 15rem;
-      }
-    }
-
-    /* Multi-platform Table Container */
-    .table-container {
-      max-height: clamp(220px, 45vh, 420px);
+    .table-wrapper {
+      max-height: 400px;
       overflow-y: auto;
-      overflow-x: auto;
-      border-radius: 0.75rem;
-      border: 1px solid var(--slate-200);
-      background-color: #ffffff;
       -webkit-overflow-scrolling: touch;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      text-align: left;
-      font-size: clamp(0.7rem, 1.1vw, 0.8rem);
-      min-width: 280px;
+      text-align: center;
+      font-size: 0.8rem;
     }
 
     thead {
-      background-color: var(--slate-100);
-      color: var(--slate-600);
+      background: rgba(0,0,0,0.3);
       position: sticky;
       top: 0;
+      backdrop-filter: blur(10px);
       z-index: 10;
-      font-size: clamp(0.58rem, 0.9vw, 0.65rem);
+    }
+
+    th {
+      padding: 0.75rem 0.5rem;
+      color: var(--text-muted);
+      font-weight: 600;
       text-transform: uppercase;
-      font-weight: 800;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.05em;
+      font-size: 0.7rem;
+      border-bottom: 1px solid var(--glass-border);
     }
 
-    th, td {
-      padding: clamp(0.55rem, 1.2vw, 0.75rem) 0.5rem;
-      text-align: center;
-      border-bottom: 1px solid var(--slate-100);
+    td {
+      padding: 0.875rem 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      color: var(--text-secondary);
+      font-family: ui-monospace, monospace;
     }
 
-    th { border-right: 1px solid var(--slate-200); }
-    td { border-right: 1px solid var(--slate-100); }
-
-    tr.location-row {
-      background-color: var(--slate-100);
-      color: var(--slate-900);
-      font-weight: 800;
-      font-size: clamp(0.6rem, 0.9vw, 0.7rem);
+    .row-local {
+      background: rgba(255,255,255,0.02);
+      text-align: left;
+    }
+    .row-local td {
+      padding: 0.75rem 1rem;
+      color: #fff;
+      font-weight: 600;
+      font-family: inherit;
+      font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
-    tr.location-row td {
-      text-align: left;
-      padding: 0.6rem 0.75rem;
-    }
-
-    tr.match-row {
-      background-color: #ecfdf5;
-      color: #065f46;
+    .cell-atual {
+      color: #fff;
       font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .cell-ambiente {
+      font-family: inherit;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
     }
 
-    td.match-cell {
-      background-color: rgba(209, 250, 229, 0.85);
-      color: #047857;
-      font-weight: 800;
-    }
+    /* Estado da Linha Encontrada */
+    tr.match-row { background: rgba(16, 185, 129, 0.05); }
+    tr.match-row td { border-bottom-color: rgba(16, 185, 129, 0.1); }
+    .match-cell { color: var(--success); font-weight: 800; }
 
-    /* Responsive Modal Overlay */
+    /* Modal Bottom Sheet */
     .modal-overlay {
-      position: fixed;
+      position: absolute;
       inset: 0;
-      background-color: rgba(15, 23, 42, 0.75);
+      background: rgba(0,0,0,0.6);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
       z-index: 100;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
+      align-items: flex-end; /* Fica no rodapé como iOS */
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.3s ease;
     }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
 
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal-content {
-      background-color: #ffffff;
-      border-radius: 1.25rem;
-      max-width: clamp(18rem, 90vw, 28rem);
+    .modal-sheet {
       width: 100%;
-      padding: clamp(1rem, 3vw, 1.5rem);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+      background: var(--bg-surface-elevated);
+      border-radius: 24px 24px 0 0;
+      padding: 2rem 1.5rem max(2rem, env(safe-area-inset-bottom));
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 1.25rem;
+      border-top: 1px solid var(--glass-border);
+    }
+    .modal-overlay.active .modal-sheet { transform: translateY(0); }
+
+    .modal-handle {
+      width: 40px;
+      height: 4px;
+      background: var(--glass-highlight);
+      border-radius: 4px;
+      margin: -1rem auto 1rem;
     }
 
-    .btn-primary {
-      background-color: var(--slate-900);
-      color: #ffffff;
-      border: none;
-      padding: 0.75rem 1rem;
-      border-radius: 0.75rem;
-      font-size: clamp(0.75rem, 1vw, 0.85rem);
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      transition: background-color 0.2s;
-      text-decoration: none;
-      min-height: var(--touch-target);
+    .toast {
+      position: absolute;
+      bottom: max(2rem, env(safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #fff;
+      color: #000;
+      padding: 0.75rem 1.25rem;
+      border-radius: 99px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      z-index: 200;
     }
-    .btn-primary:hover, .btn-primary:focus-visible { background-color: var(--slate-700); outline: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     .hidden { display: none !important; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
   </style>
 </head>
 <body>
 
-  <div class="app-card">
+  <div class="app-container">
     
-    <!-- App Header -->
+    <!-- HEADER -->
     <header class="app-header">
-      <div class="brand-group">
-        <div class="brand-icon-wrapper" title="Consulta de Seção Eleitoral">
-          <svg style="width: 1.2rem; height: 1.2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      <div class="brand">
+        <div class="brand-icon">
+          <!-- Ícone Premium de Urna/Check -->
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+            <path d="M9 12l2 2 4-4" />
+            <path d="M22 4l-5 5" />
           </svg>
         </div>
-        <div class="header-titles">
-          <h1>Consulta de Seção Eleitoral</h1>
-          <p>Conversor Seção Antiga → Nova</p>
+        <div class="brand-title">
+          <h1>Consulta de Seção</h1>
+          <p>Localizador Eleitoral Oficial</p>
         </div>
       </div>
 
       <div class="header-actions">
-        <!-- Accessibility Font Size Adjuster -->
-        <div style="display: flex; gap: 0.25rem;" title="Ajustar Tamanho do Texto">
-          <button onclick="alterarTamanhoFonte(-0.05)" class="font-btn" title="Diminuir texto" aria-label="Diminuir texto">A-</button>
-          <button onclick="alterarTamanhoFonte(0.05)" class="font-btn" title="Aumentar texto" aria-label="Aumentar texto">A+</button>
-        </div>
-
-        <button id="networkStatusBadge" onclick="abrirModalOffline()" class="status-badge online" title="Status de conexão" aria-label="Status de conexão">
-          <span class="status-dot green"></span>
-          <span>Online</span>
+        <button class="icon-button" onclick="alterarTamanhoFonte(-0.05)" aria-label="Reduzir fonte">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14"/></svg>
         </button>
+        <button class="icon-button" onclick="alterarTamanhoFonte(0.05)" aria-label="Aumentar fonte">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <div id="networkBadge" class="icon-button" onclick="abrirModalOffline()" style="border: none; background: transparent;">
+          <div class="status-dot"></div>
+        </div>
       </div>
     </header>
 
-    <!-- App Body Container -->
-    <div class="app-body">
-      <a 
-        href="https://www.tse.jus.br/servicos-eleitorais/autoatendimento-eleitoral#/?id=1740416188898" 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        class="tse-official-link"
-        id="tseExternalBanner"
-        title="Consulta oficial por Nome, CPF ou Título no TSE"
-      >
-        <div style="display: flex; align-items: center; gap: 0.6rem;">
-          <svg style="width: 1.1rem; height: 1.1rem; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
-          </svg>
-          <span>Consultar por Nome / CPF no Portal Oficial do TSE</span>
+    <main class="app-content">
+      
+      <!-- BANNER TSE -->
+      <a href="https://www.tse.jus.br/servicos-eleitorais/autoatendimento-eleitoral#/?id=1740416188898" target="_blank" rel="noopener" class="tse-banner">
+        <div class="tse-banner-text">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Consulta Oficial pelo Nome/CPF
         </div>
-        <svg style="width: 0.9rem; height: 0.9rem; opacity: 0.8; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-        </svg>
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>
 
-      <div>
-        <div class="input-label">
-          <span>Digite o número da Seção (Antiga ou Atual):</span>
-          <span id="totalCounter" style="font-size: 0.65rem; color: #64748b; font-weight: 600;"></span>
-        </div>
-        
-        <div class="search-wrapper">
+      <!-- BUSCA -->
+      <section class="search-section">
+        <label class="search-label" id="totalCounter">Digite o número da seção (antiga ou atual)</label>
+        <div class="search-input-wrapper">
+          <svg class="search-icon-left" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          
           <input 
             type="text" 
             inputmode="numeric" 
             pattern="[0-9]*"
             id="searchInput"
-            placeholder="Ex: 56, 1, 81, 546..."
             class="search-input"
+            placeholder="Ex: 56, 81, 546..."
             oninput="buscarSecao()"
-            autofocus
+            autocomplete="off"
           >
-          <div class="search-icon">
-            <svg style="width: 1.1rem; height: 1.1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-          </div>
-
-          <div class="input-actions">
-            <!-- Voice Input Mic Button -->
-            <button 
-              id="voiceBtn" 
-              onclick="iniciarBuscaPorVoz()" 
-              class="icon-btn" 
-              title="Falar número da seção"
-              aria-label="Busca por voz"
-            >
-              <svg style="width: 1.1rem; height: 1.1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
-              </svg>
+          
+          <div class="search-actions-right">
+            <button id="clearBtn" class="clear-button hidden" onclick="limparBusca()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
-
-            <!-- Clear Search Button -->
-            <button 
-              id="clearBtn"
-              onclick="limparBusca()"
-              class="icon-btn hidden"
-              title="Limpar busca"
-              aria-label="Limpar busca"
-            >
-              <svg style="width: 1.1rem; height: 1.1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
+            <button id="voiceBtn" class="mic-button" onclick="iniciarBuscaPorVoz()">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
             </button>
           </div>
         </div>
 
-        <!-- Professional Shortcut Chips & Quick Filters -->
-        <div class="shortcuts-container custom-scrollbar">
-          <span style="font-weight: 700; font-size: 0.6rem; text-transform: uppercase; color: #64748b; flex-shrink: 0;">Filtros:</span>
-          <button onclick="definirBusca('56')" class="chip-btn">56</button>
-          <button onclick="definirBusca('1')" class="chip-btn">1</button>
-          <button onclick="definirBusca('81')" class="chip-btn">81</button>
-          <button onclick="filtrarPorAmbiente('Teatro')" class="chip-btn">
-            <svg style="width: 0.8rem; height: 0.8rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-            Teatro
-          </button>
-          <button onclick="filtrarPorAmbiente('Quadra')" class="chip-btn">
-            <svg style="width: 0.8rem; height: 0.8rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2h1.5a2.5 2.5 0 002.5-2.5V11m-12.8 0A9 9 0 1121 12"></path></svg>
-            Quadra
-          </button>
-          <button onclick="filtrarPorAmbiente('Secretaria')" class="chip-btn">
-            <svg style="width: 0.8rem; height: 0.8rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-            Secretaria
-          </button>
-          <button onclick="filtrarPorAmbiente('Z36')" class="chip-btn">
-            <svg style="width: 0.8rem; height: 0.8rem; color: #f59e0b;" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-            Zona 036
-          </button>
+        <!-- Filtros Rápidos (Chips) -->
+        <div class="chip-scroll">
+          <div class="chip chip-z36" id="chip-z36" onclick="filtrarPorAmbiente('Z36')">
+            ★ Zona 036
+          </div>
+          <div class="chip" id="chip-teatro" onclick="filtrarPorAmbiente('Teatro')">🎭 Teatro</div>
+          <div class="chip" id="chip-quadra" onclick="filtrarPorAmbiente('Quadra')">🏀 Quadra</div>
+          <div class="chip" id="chip-secretaria" onclick="filtrarPorAmbiente('Secretaria')">📁 Secretaria</div>
         </div>
-      </div>
+      </section>
 
-      <!-- Instant Search Results Box -->
+      <!-- RESULTADO -->
       <div id="resultsContainer" class="hidden">
-        <div id="resultsContent" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+        <!-- Renderizado via JS -->
       </div>
 
-      <!-- Tabs & Location Filters -->
-      <div class="tabs-wrapper">
-        <div class="tabs-controls">
-          <div class="tab-group">
-            <button 
-              id="tabPrincipais" 
-              onclick="mudarAba('principais')" 
-              class="tab-btn active"
-            >
-              Local Principal (SESC)
-            </button>
-            <button 
-              id="tabOutros" 
-              onclick="mudarAba('outros')" 
-              class="tab-btn"
-            >
-              Outros Locais
-            </button>
+      <!-- LISTA COMPLETA -->
+      <section class="list-section">
+        <div class="list-header">
+          <div class="segmented-control">
+            <button id="tabPrincipais" class="segment-btn active" onclick="mudarAba('principais')">Local Principal</button>
+            <button id="tabOutros" class="segment-btn" onclick="mudarAba('outros')">Outros Locais</button>
           </div>
-          <select id="locationSelect" onchange="renderizarTabela(this.value)" class="select-dropdown" aria-label="Filtrar por local">
-            <!-- Populated dynamically -->
+          <select id="locationSelect" class="custom-select" onchange="renderizarTabela(this.value)">
+            <!-- Opções via JS -->
           </select>
         </div>
-      </div>
 
-      <!-- Compact Section Mapping Table -->
-      <div class="table-container custom-scrollbar">
-        <table>
-          <thead>
-            <tr>
-              <th>Antiga 1*</th>
-              <th>Antiga 2</th>
-              <th style="color: #0f172a;">Atual</th>
-              <th style="color: #0f172a;">Ambiente</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Antiga 1</th>
+                <th>Antiga 2</th>
+                <th style="color: #fff;">Atual</th>
+                <th>Ambiente</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- JS Render -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+      
+      <div style="text-align: center; font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">
+        Consulta Seção v1.5
       </div>
-      <div style="font-size: 0.65rem; color: #64748b; font-weight: 600; font-style: italic; display: flex; align-items: center; gap: 0.25rem; padding-left: 0.25rem;">
-        <span>* Seções pertencentes à antiga Zona 036.</span>
+    </main>
+
+    <!-- Modal Offline -->
+    <div id="offlineModal" class="modal-overlay" onclick="fecharModalOffline(event)">
+      <div class="modal-sheet" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: #fff;">Usar Offline no Celular</h2>
+        
+        <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5;">
+          Este aplicativo foi projetado para funcionar perfeitamente sem internet. Ideal para o dia da votação em locais sem sinal.
+        </p>
+
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 1rem; border-radius: 12px;">
+          <strong style="font-size: 0.8rem; color: #fff; text-transform: uppercase;">Como salvar:</strong>
+          <ul style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem; padding-left: 1.2rem; line-height: 1.6;">
+            <li><strong>Android (Chrome):</strong> Menu (⋮) > Adicionar à tela inicial.</li>
+            <li><strong>iPhone (Safari):</strong> Compartilhar > Adicionar à Tela de Início.</li>
+          </ul>
+        </div>
+
+        <button onclick="baixarAppOffline()" class="action-btn" style="background: #fff; color: #000; margin-top: 0.5rem;">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Baixar Arquivo HTML
+        </button>
       </div>
     </div>
+    
+    <div id="toast" class="toast">Mensagem copiada!</div>
 
-    <!-- Mini Footer -->
-    <footer style="background-color: var(--slate-50); padding: 0.75rem 1.25rem; text-align: center; font-size: 0.65rem; color: #94a3b8; border-top: 1px solid var(--slate-200); font-weight: 500; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-      <span>Consulta Seção v1.5</span>
-      <button onclick="abrirModalOffline()" style="background: none; border: none; color: #475569; font-size: 0.65rem; font-weight: 700; cursor: pointer; text-decoration: underline; display: flex; align-items: center; gap: 0.3rem;">
-        <svg style="width: 0.8rem; height: 0.8rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-        Instalar / Usar Offline
-      </button>
-    </footer>
-  </div>
-
-  <!-- Offline Download / Installation Instructions Modal -->
-  <div id="offlineModal" class="modal-overlay" onclick="fecharModalOffline(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="font-size: 1rem; font-weight: 800; color: #0f172a;">Usar sem Internet no Celular</h3>
-        <button onclick="fecharModalOffline()" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;" aria-label="Fechar">&times;</button>
-      </div>
-
-      <p style="font-size: 0.75rem; color: #475569; line-height: 1.4;">
-        Este aplicativo é <strong>100% autônomo</strong>. Você pode salvá-lo no celular e usá-lo no dia da votação sem sinal de internet ou Wi-Fi.
-      </p>
-
-      <div style="background-color: var(--slate-50); padding: 0.85rem; border-radius: 0.75rem; border: 1px solid var(--slate-200); display: flex; flex-direction: column; gap: 0.5rem;">
-        <span style="font-size: 0.7rem; font-weight: 800; color: #0f172a; text-transform: uppercase;">Como Salvar no Celular:</span>
-        <div style="font-size: 0.7rem; color: #334155; line-height: 1.4;">
-          <strong>No Android (Chrome):</strong> Toque no menu (<strong>⋮</strong>) e escolha <em>"Adicionar à tela inicial"</em>.
-        </div>
-        <div style="font-size: 0.7rem; color: #334155; line-height: 1.4;">
-          <strong>No iPhone (Safari):</strong> Toque no botão Compartilhar e escolha <em>"Adicionar à Tela de Início"</em>.
-        </div>
-      </div>
-
-      <button onclick="baixarAppOffline()" class="btn-primary">
-        <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-        </svg>
-        Baixar Arquivo .HTML para Guardar
-      </button>
-    </div>
   </div>
 
   <script>
+    /* =========================================================================
+       BASE DE DADOS
+       ========================================================================= */
     const RELACAO_SECOES = [
       {
         local: "SESC",
@@ -947,11 +891,12 @@
           { a1: 91,   a2: 56,  atual: 506 },
           { a1: null, a2: 98,  atual: 507 },
           { a1: null, a2: 101, atual: 508 },
-          { a1: null, a2: 107, atual: 509 },
+          { a1: null, a2: 107, atual: 509 }, // Seção restaurada
           { a1: null, a2: 109, atual: 510 },
           { a1: null, a2: 119, atual: 511 },
           { a1: null, a2: 139, atual: 512 },
           { a1: null, a2: 146, atual: 513 },
+          // Migradas do Mauá
           { a1: 56,   a2: 1,   atual: 546 },
           { a1: 57,   a2: 2,   atual: 547 },
           { a1: 58,   a2: 3,   atual: 548 },
@@ -959,7 +904,7 @@
           { a1: 60,   a2: 5,   atual: 550 },
           { a1: 61,   a2: 6,   atual: 551 },
           { a1: 62,   a2: 7,   atual: 552 },
-          { a1: null, a2: null, atual: 626 }
+          { a1: null, a2: null, atual: 626 } // Seção restaurada
         ]
       },
       {
@@ -1049,54 +994,71 @@
     };
 
     const SECOES_ZONA_036 = new Set([56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 81, 82, 83, 84, 85, 86, 87, 89, 90, 91, 398]);
-
     const LOCAIS_PRINCIPAIS = ["SESC"];
+    
+    /* =========================================================================
+       LÓGICA DA INTERFACE
+       ========================================================================= */
     let activeTab = 'principais';
     let activeSearchNum = null;
     let ambienteFilter = null;
     let currentFontScale = 1.0;
 
-    function acionarVibracao() {
-      try {
-        if ('vibrate' in navigator && typeof navigator.vibrate === 'function') {
-          navigator.vibrate([15]);
-        }
-      } catch (e) {}
+    function haptic() {
+      try { if ('vibrate' in navigator) navigator.vibrate(10); } catch (e) {}
     }
 
     function alterarTamanhoFonte(delta) {
-      acionarVibracao();
-      currentFontScale = Math.min(Math.max(currentFontScale + delta, 0.85), 1.25);
-      document.documentElement.style.setProperty('--font-scale', `${currentFontScale}`);
+      haptic();
+      currentFontScale = Math.min(Math.max(currentFontScale + delta, 0.9), 1.2);
+      document.documentElement.style.setProperty('--font-scale', currentFontScale);
     }
 
-    function eLocalPrincipal(localName) {
-      return LOCAIS_PRINCIPAIS.includes(localName);
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
     }
 
-    function mudarAba(aba, manterFiltroSelect = false) {
-      acionarVibracao();
+    // Modal Offline
+    function abrirModalOffline() {
+      haptic();
+      document.getElementById('offlineModal').classList.add('active');
+    }
+    function fecharModalOffline() {
+      document.getElementById('offlineModal').classList.remove('active');
+    }
+    function baixarAppOffline() {
+      haptic();
+      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Consulta_Local_Eleitoral.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Abas e Filtros
+    function mudarAba(aba, manterFiltro = false) {
+      haptic();
       activeTab = aba;
       ambienteFilter = null;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
       
-      const tabPrincipais = document.getElementById('tabPrincipais');
-      const tabOutros = document.getElementById('tabOutros');
+      const tabP = document.getElementById('tabPrincipais');
+      const tabO = document.getElementById('tabOutros');
       const select = document.getElementById('locationSelect');
 
-      if (!tabPrincipais || !tabOutros || !select) return;
-
       if (aba === 'principais') {
-        tabPrincipais.className = "tab-btn active";
-        tabOutros.className = "tab-btn";
-        
-        select.innerHTML = `
-          <option value="TODOS">Todos Principais (SESC)</option>
-          <option value="SESC">SESC</option>
-        `;
+        tabP.classList.add('active'); tabO.classList.remove('active');
+        select.innerHTML = `<option value="TODOS">Todos Principais (SESC)</option><option value="SESC">SESC</option>`;
       } else {
-        tabOutros.className = "tab-btn active";
-        tabPrincipais.className = "tab-btn";
-        
+        tabO.classList.add('active'); tabP.classList.remove('active');
         select.innerHTML = `
           <option value="TODOS">Todos Outros Locais</option>
           <option value="CLUBE MAUÁ">Clube Mauá</option>
@@ -1106,424 +1068,229 @@
           <option value="EQUIPE MÁXIMA DE ENSINO">Equipe Máxima de Ensino</option>
         `;
       }
-
-      if (!manterFiltroSelect) {
-        select.value = "TODOS";
-      }
+      if (!manterFiltro) select.value = "TODOS";
       renderizarTabela(select.value);
     }
 
-    function iniciarBuscaPorVoz() {
-      acionarVibracao();
-      try {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) {
-          exibirToast("Reconhecimento de voz não suportado neste navegador.");
-          return;
-        }
-
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'pt-BR';
-        const voiceBtn = document.getElementById('voiceBtn');
-        if (voiceBtn) voiceBtn.classList.add('recording');
-
-        recognition.onresult = (event) => {
-          if (voiceBtn) voiceBtn.classList.remove('recording');
-          const transcript = event.results[0][0].transcript;
-          const numeros = transcript.replace(/\D/g, '');
-          if (numeros) {
-            definirBusca(numeros);
-          } else {
-            exibirToast(`Ouvi: "${transcript}". Digite o número.`);
-          }
-        };
-
-        recognition.onerror = () => {
-          if (voiceBtn) voiceBtn.classList.remove('recording');
-          exibirToast("Não foi possível ouvir. Tente digitar.");
-        };
-
-        recognition.onend = () => {
-          if (voiceBtn) voiceBtn.classList.remove('recording');
-        };
-
-        recognition.start();
-      } catch (e) {
-        exibirToast("Busca por voz não disponível.");
+    function filtrarPorAmbiente(amb) {
+      haptic();
+      const chipId = `chip-${amb.toLowerCase()}`;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      
+      if (ambienteFilter === amb) {
+        ambienteFilter = null;
+      } else {
+        ambienteFilter = amb;
+        document.getElementById(chipId)?.classList.add('active');
       }
+      renderizarTabela(document.getElementById('locationSelect').value);
+    }
+
+    // Busca e Lógica Core
+    function limparBusca() {
+      haptic();
+      document.getElementById('searchInput').value = '';
+      buscarSecao();
     }
 
     function buscarSecao() {
-      const input = document.getElementById('searchInput');
-      if (!input) return;
-
-      const query = input.value.trim();
-      const clearBtn = document.getElementById('clearBtn');
-      const resultsContainer = document.getElementById('resultsContainer');
-      const resultsContent = document.getElementById('resultsContent');
-
-      if (!query) {
-        if (clearBtn) clearBtn.classList.add('hidden');
-        if (resultsContainer) resultsContainer.classList.add('hidden');
+      const val = document.getElementById('searchInput').value.trim();
+      const clear = document.getElementById('clearBtn');
+      const container = document.getElementById('resultsContainer');
+      
+      if (!val) {
+        clear.classList.add('hidden');
+        container.classList.add('hidden');
         activeSearchNum = null;
-        renderizarTabela(document.getElementById('locationSelect')?.value || 'TODOS');
+        renderizarTabela(document.getElementById('locationSelect').value);
         return;
       }
-
-      if (clearBtn) clearBtn.classList.remove('hidden');
-      const numQuery = parseInt(query, 10);
-      activeSearchNum = numQuery;
-
+      
+      clear.classList.remove('hidden');
+      activeSearchNum = parseInt(val, 10);
+      
       const resultados = [];
-
       RELACAO_SECOES.forEach(bloco => {
         bloco.secoes.forEach(item => {
-          if (item.a1 === numQuery || item.a2 === numQuery || item.atual === numQuery) {
+          if (item.a1 === activeSearchNum || item.a2 === activeSearchNum || item.atual === activeSearchNum) {
             resultados.push({ local: bloco.local, item });
           }
         });
       });
 
-      if (resultsContainer) resultsContainer.classList.remove('hidden');
+      container.classList.remove('hidden');
 
       if (resultados.length === 0) {
-        if (resultsContent) {
-          resultsContent.innerHTML = `
-            <div style="background-color: var(--slate-50); border: 1px solid var(--slate-200); color: #334155; padding: 1.1rem; border-radius: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
-              <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; font-weight: 600;">
-                <svg style="width: 1.1rem; height: 1.1rem; color: #f59e0b; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                <span>Seção <strong style="color: #0f172a;">"${query}"</strong> não consta na relação local.</span>
-              </div>
-              <a href="https://www.tse.jus.br/servicos-eleitorais/autoatendimento-eleitoral#/?id=1740416188898" target="_blank" rel="noopener noreferrer" class="btn-primary" style="background-color: #0284c7; text-decoration: none;">
-                <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                Consultar no Portal Oficial do TSE
-              </a>
-            </div>
-          `;
-        }
+        container.innerHTML = `
+          <div class="not-found-card">
+            <svg width="32" height="32" fill="none" stroke="var(--warning)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            <p>A seção <strong>"${val}"</strong> não foi encontrada nesta base local.</p>
+            <a href="https://www.tse.jus.br/servicos-eleitorais/autoatendimento-eleitoral#/?id=1740416188898" target="_blank" class="btn-tse-primary">
+              Consultar Portal Oficial do TSE
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+          </div>`;
       } else {
         let html = '';
         resultados.forEach(res => {
           const item = res.item;
-          const ambiente = MAPA_SALAS[item.atual];
-          const isZona36 = item.a1 !== null && SECOES_ZONA_036.has(item.a1);
-          const ambienteHtml = ambiente 
-            ? `<div class="room-badge">
-                 <svg style="width: 1.1rem; height: 1.1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                 <span>${ambiente}</span>
-               </div>`
-            : '';
-          const zona36Html = isZona36
-            ? `<div style="font-size: 0.8rem; color: #fbbf24; font-weight: 700; margin-top: 0.25rem; display: flex; align-items: center; gap: 0.4rem; background: rgba(245, 158, 11, 0.15); padding: 0.35rem 0.6rem; border-radius: 0.4rem; width: fit-content; border: 1px solid rgba(251, 191, 36, 0.3);">
-                 <svg style="width: 0.95rem; height: 0.95rem;" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                 <span>Antiga Zona 036</span>
-               </div>`
-            : '';
-
+          const amb = MAPA_SALAS[item.atual] || 'NÃO DEFINIDO';
+          const isZ36 = item.a1 !== null && SECOES_ZONA_036.has(item.a1);
+          
           html += `
-            <div class="result-card">
-              <div style="display: flex; flex-direction: column; gap: 0.6rem; min-width: 0; flex: 1;">
-                
-                <span style="font-size: clamp(0.9rem, 2vw, 1.15rem); text-transform: uppercase; font-weight: 800; color: #ffffff; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.4rem;">
-                  <svg style="width: 1.25rem; height: 1.25rem; color: #38bdf8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                  ${res.local}
-                </span>
-
-                <div style="font-size: clamp(0.75rem, 1.5vw, 0.85rem); color: #cbd5e1; font-weight: 600; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
-                  <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); padding: 0.4rem 0.65rem; border-radius: 0.5rem; display: flex; align-items: center; gap: 0.35rem;">
-                    Ant. 1: <strong style="color: #ffffff; font-size: 1.15em;">${item.a1 !== null ? item.a1 + (isZona36 ? '<span style="color:#f59e0b; margin-left:2px;">*</span>' : '') : '—'}</strong>
-                  </div>
-                  <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); padding: 0.4rem 0.65rem; border-radius: 0.5rem; display: flex; align-items: center; gap: 0.35rem;">
-                    Ant. 2: <strong style="color: #ffffff; font-size: 1.15em;">${item.a2 ?? '—'}</strong>
+            <div class="result-pass">
+              <div class="pass-header">
+                <div class="pass-icon">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                </div>
+                <div class="pass-local">
+                  <h2>${res.local}</h2>
+                  <div class="pass-old-sections">
+                    <div class="old-badge">A1: <strong>${item.a1 !== null ? item.a1 : '—'}</strong> ${isZ36 ? '<span class="star-z36">★</span>' : ''}</div>
+                    <div class="old-badge">A2: <strong>${item.a2 ?? '—'}</strong></div>
                   </div>
                 </div>
-                
-                ${zona36Html}
-                ${ambienteHtml}
               </div>
+              
+              <div class="pass-divider"></div>
 
-              <div class="result-card-highlight">
-                <span style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #d1fae5; display: flex; align-items: center; gap: 0.3rem; z-index: 1;">
-                  <svg style="width: 0.85rem; height: 0.85rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                  SEÇÃO ATUAL
-                </span>
-                <span class="mono" style="font-size: clamp(2.5rem, 8vw + 1rem, 3.5rem); font-weight: 900; color: #ffffff; line-height: 1.1; text-shadow: 0 3px 6px rgba(0,0,0,0.25); margin: 0.35rem 0; z-index: 1;">${item.atual}</span>
-                
-                <div class="action-group" style="z-index: 1;">
-                  <button 
-                    onclick="copiarSimples('${res.local}', '${item.a1 ?? '—'}', '${item.a2 ?? '—'}', '${item.atual}', '${ambiente ?? ''}')"
-                    class="copy-btn"
-                    title="Copiar texto"
-                    style="color: #047857; font-weight: 800;"
-                  >
-                    <svg style="width: 0.85rem; height: 0.85rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                    Copiar
-                  </button>
-                  <button 
-                    onclick="compartilharResultado('${res.local}', '${item.a1 ?? '—'}', '${item.a2 ?? '—'}', '${item.atual}', '${ambiente ?? ''}')"
-                    class="share-btn"
-                    title="Compartilhar"
-                  >
-                    <svg style="width: 0.85rem; height: 0.85rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
-                  </button>
+              <div class="pass-main">
+                <div>
+                  <div class="pass-atual-label">Seção Atual</div>
+                  <div class="pass-number">${item.atual}</div>
+                </div>
+                <div class="pass-room">
+                  <span class="pass-room-label">Ambiente</span>
+                  <span class="pass-room-name">${amb}</span>
                 </div>
               </div>
-            </div>
-          `;
+
+              <div class="pass-actions">
+                <button onclick="copiarInfo('${res.local}', '${item.a1}', '${item.a2}', '${item.atual}', '${amb}', ${isZ36})" class="action-btn btn-copy">
+                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                  Copiar
+                </button>
+                <button onclick="compartilharInfo('${res.local}', '${item.a1}', '${item.a2}', '${item.atual}', '${amb}', ${isZ36})" class="action-btn btn-share">
+                  Compartilhar
+                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                </button>
+              </div>
+            </div>`;
         });
-        if (resultsContent) resultsContent.innerHTML = html;
+        container.innerHTML = html;
 
-        const primeiroResultado = resultados[0];
-        const ePrincipal = eLocalPrincipal(primeiroResultado.local);
-        const abaNecessaria = ePrincipal ? 'principais' : 'outros';
-        if (activeTab !== abaNecessaria) {
-          mudarAba(abaNecessaria, true);
-          return;
-        }
+        // Auto-switch tabs if needed
+        const f_local = resultados[0].local;
+        const belongsToMain = LOCAIS_PRINCIPAIS.includes(f_local);
+        if (belongsToMain && activeTab !== 'principais') mudarAba('principais', true);
+        else if (!belongsToMain && activeTab === 'principais') mudarAba('outros', true);
       }
-
-      renderizarTabela(document.getElementById('locationSelect')?.value || 'TODOS');
+      
+      renderizarTabela(document.getElementById('locationSelect').value);
     }
 
-    function renderizarTabela(filtroLocal = 'TODOS') {
+    function renderizarTabela(filtro) {
       const tbody = document.getElementById('tableBody');
-      if (!tbody) return;
-
       tbody.innerHTML = '';
 
-      const dadosAba = RELACAO_SECOES.filter(bloco => {
-        if (activeTab === 'principais') {
-          return LOCAIS_PRINCIPAIS.includes(bloco.local);
-        } else {
-          return !LOCAIS_PRINCIPAIS.includes(bloco.local);
-        }
-      });
+      const base = RELACAO_SECOES.filter(b => activeTab === 'principais' ? LOCAIS_PRINCIPAIS.includes(b.local) : !LOCAIS_PRINCIPAIS.includes(b.local));
+      const filteredBase = filtro === 'TODOS' ? base : base.filter(b => b.local === filtro);
 
-      const dadosFiltrados = filtroLocal === 'TODOS' 
-        ? dadosAba 
-        : dadosAba.filter(d => d.local === filtroLocal);
+      let totalCount = 0;
 
-      let totalSecoesContadas = 0;
-
-      dadosFiltrados.forEach(bloco => {
-        let secoesVisiveis = bloco.secoes;
-
+      filteredBase.forEach(b => {
+        let items = b.secoes;
         if (ambienteFilter) {
           if (ambienteFilter === 'Z36') {
-            secoesVisiveis = secoesVisiveis.filter(s => s.a1 !== null && SECOES_ZONA_036.has(s.a1));
+            items = items.filter(s => s.a1 !== null && SECOES_ZONA_036.has(s.a1));
           } else {
-            secoesVisiveis = secoesVisiveis.filter(s => {
-              const amb = MAPA_SALAS[s.atual] || '';
-              return amb.toLowerCase().includes(ambienteFilter.toLowerCase());
-            });
+            items = items.filter(s => (MAPA_SALAS[s.atual] || '').toLowerCase().includes(ambienteFilter.toLowerCase()));
           }
         }
+        if (items.length === 0) return;
+        totalCount += items.length;
 
-        if (secoesVisiveis.length === 0) return;
-
-        totalSecoesContadas += secoesVisiveis.length;
-
-        const headerRow = document.createElement('tr');
-        headerRow.className = "location-row";
-        headerRow.innerHTML = `
-          <td colspan="4">
-            🏢 ${bloco.local} 
-            <span style="font-weight: 600; opacity: 0.6; margin-left: 0.25rem;">(${secoesVisiveis.length} seções)</span>
-          </td>
-        `;
-        tbody.appendChild(headerRow);
-
-        secoesVisiveis.forEach(row => {
-          const isMatch = activeSearchNum !== null && (row.a1 === activeSearchNum || row.a2 === activeSearchNum || row.atual === activeSearchNum);
-          const ambienteStr = MAPA_SALAS[row.atual] || '<span style="opacity:0.3">—</span>';
-          const isZ36 = row.a1 !== null && SECOES_ZONA_036.has(row.a1);
+        tbody.innerHTML += `<tr class="row-local"><td colspan="4">${b.local}</td></tr>`;
+        
+        items.forEach(s => {
+          const isMatch = activeSearchNum !== null && (s.a1 === activeSearchNum || s.a2 === activeSearchNum || s.atual === activeSearchNum);
+          const isZ36 = s.a1 !== null && SECOES_ZONA_036.has(s.a1);
+          const a1Str = s.a1 !== null ? `${s.a1}${isZ36 ? '<span style="color:var(--warning)">*</span>' : ''}` : '—';
           
-          const tr = document.createElement('tr');
-          if (isMatch) {
-            tr.className = 'match-row';
-          }
-
-          const displayA1 = row.a1 !== null 
-            ? `${row.a1}${isZ36 ? '<span style="color:#f59e0b; font-weight:bold;" title="Antiga Zona 036">*</span>' : ''}` 
-            : '<span style="color:#cbd5e1; font-family:sans-serif;">—</span>';
-
-          tr.innerHTML = `
-            <td class="mono ${row.a1 === activeSearchNum ? 'match-cell' : ''}">
-              ${displayA1}
-            </td>
-            <td class="mono ${row.a2 === activeSearchNum ? 'match-cell' : ''}">
-              ${row.a2 ?? '<span style="color:#cbd5e1; font-family:sans-serif;">—</span>'}
-            </td>
-            <td class="mono ${row.atual === activeSearchNum ? 'match-cell' : ''}" style="font-weight: 800; color: #0f172a;">
-              ${row.atual}
-            </td>
-            <td style="font-size: 0.65rem; text-transform: uppercase; font-weight: 600; color: #64748b; ${row.atual === activeSearchNum ? 'color: #047857;' : ''}">
-              ${ambienteStr}
-            </td>
-          `;
-
-          tbody.appendChild(tr);
+          tbody.innerHTML += `
+            <tr class="${isMatch ? 'match-row' : ''}">
+              <td class="${isMatch && s.a1===activeSearchNum ? 'match-cell' : ''}">${a1Str}</td>
+              <td class="${isMatch && s.a2===activeSearchNum ? 'match-cell' : ''}">${s.a2 ?? '—'}</td>
+              <td class="cell-atual ${isMatch && s.atual===activeSearchNum ? 'match-cell' : ''}">${s.atual}</td>
+              <td class="cell-ambiente">${MAPA_SALAS[s.atual] || '—'}</td>
+            </tr>`;
         });
       });
 
-      const totalCounter = document.getElementById('totalCounter');
-      if (totalCounter) {
-        totalCounter.innerText = `${totalSecoesContadas} seções`;
-      }
+      document.getElementById('totalCounter').innerText = activeSearchNum 
+        ? `Resultados na base` 
+        : (totalCount > 0 ? `Listando ${totalCount} seções` : 'Nenhuma seção neste filtro');
     }
 
-    function definirBusca(val) {
-      acionarVibracao();
-      const input = document.getElementById('searchInput');
-      if (input) {
-        input.value = val;
-        buscarSecao();
-      }
+    // Compartilhamento e Cópia
+    function formatarTexto(l, a1, a2, at, amb, z36) {
+      return `🗳️ *Local de Votação*\n📍 ${l}${amb && amb!=='NÃO DEFINIDO' ? `\n🏢 Sala: ${amb}` : ''}\n👉 *SEÇÃO ATUAL: ${at}*\n----------------\nAntiga 1: ${a1!=='null'?a1:'—'}${z36?' (Zona 036)':''} | Antiga 2: ${a2!=='null'?a2:'—'}`;
     }
 
-    function filtrarPorAmbiente(ambiente) {
-      acionarVibracao();
-      if (ambienteFilter === ambiente) {
-        ambienteFilter = null;
-      } else {
-        ambienteFilter = ambiente;
-      }
-      renderizarTabela(document.getElementById('locationSelect')?.value || 'TODOS');
-    }
-
-    function limparBusca() {
-      acionarVibracao();
-      const input = document.getElementById('searchInput');
-      if (input) {
-        input.value = '';
-        buscarSecao();
-      }
-    }
-
-    function gerarTextoCompartilhavel(local, a1, a2, atual, ambiente = '') {
-      const ambTexto = ambiente && ambiente !== 'undefined' ? `\n📍 Ambiente: ${ambiente}` : '';
-      const numA1 = parseInt(a1, 10);
-      const z36Texto = !isNaN(numA1) && SECOES_ZONA_036.has(numA1) ? ' (Zona 036)' : '';
-      return `🗳️ *Consulta de Seção Eleitoral*\n🏢 Local: ${local}\n👉 *Seção Atual: ${atual}*${ambTexto}\n-------------------\nAntiga 1: ${a1}${z36Texto} | Antiga 2: ${a2}`;
-    }
-
-    function copiarSimples(local, a1, a2, atual, ambiente = '') {
-      acionarVibracao();
-      const texto = gerarTextoCompartilhavel(local, a1, a2, atual, ambiente);
-      
+    function copiarInfo(l, a1, a2, at, amb, z36) {
+      haptic();
+      const txt = formatarTexto(l, a1, a2, at, amb, z36);
       try {
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(texto);
-        } else {
-          const textArea = document.createElement("textarea");
-          textArea.value = texto;
-          textArea.style.position = "fixed";
-          document.body.appendChild(textArea);
-          textArea.focus();
-          textArea.select();
-          document.execCommand('copy');
-          document.body.removeChild(textArea);
-        }
-        exibirToast(`✓ Copiado para a área de transferência!`);
+        if (navigator.clipboard) { navigator.clipboard.writeText(txt); showToast("Copiado com sucesso!"); }
+        else throw new Error();
       } catch (e) {
-        exibirToast(`✓ Informação selecionada.`);
+        const t = document.createElement("textarea"); t.value = txt; document.body.appendChild(t);
+        t.select(); document.execCommand('copy'); t.remove(); showToast("Copiado com sucesso!");
       }
     }
 
-    function compartilharResultado(local, a1, a2, atual, ambiente = '') {
-      acionarVibracao();
-      const texto = gerarTextoCompartilhavel(local, a1, a2, atual, ambiente);
-
-      try {
-        if (navigator.share) {
-          navigator.share({
-            title: 'Local de Votação',
-            text: texto
-          }).catch(() => {});
-        } else {
-          copiarSimples(local, a1, a2, atual, ambiente);
-        }
-      } catch (e) {
-        copiarSimples(local, a1, a2, atual, ambiente);
-      }
+    function compartilharInfo(l, a1, a2, at, amb, z36) {
+      haptic();
+      const txt = formatarTexto(l, a1, a2, at, amb, z36);
+      if (navigator.share) navigator.share({ title: 'Seção Eleitoral', text: txt }).catch(()=>{});
+      else copiarInfo(l, a1, a2, at, amb, z36);
     }
 
-    function exibirToast(msg) {
-      const toast = document.createElement('div');
-      toast.style.cssText = 'position:fixed; bottom:1.25rem; left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; font-size:0.75rem; padding:0.6rem 1.2rem; border-radius:9999px; box-shadow:0 10px 20px rgba(0,0,0,0.4); z-index:999; font-weight:700; border:1px solid #334155; animation: fadeIn 0.2s ease-out; pointer-events:none; text-align:center; max-width: 90vw;';
-      toast.innerHTML = msg;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 2200);
-    }
-
-    function abrirModalOffline() {
-      acionarVibracao();
-      const modal = document.getElementById('offlineModal');
-      if (modal) modal.classList.add('active');
-    }
-
-    function fecharModalOffline(e) {
-      const modal = document.getElementById('offlineModal');
-      if (modal) modal.classList.remove('active');
-    }
-
-    function atualizarStatusConexao() {
-      const badge = document.getElementById('networkStatusBadge');
-      const tseBanner = document.getElementById('tseExternalBanner');
-
-      if (navigator.onLine) {
-        if (badge) {
-          badge.className = 'status-badge online';
-          badge.innerHTML = `<span class="status-dot green"></span><span>Online</span>`;
-        }
-        if (tseBanner) {
-          tseBanner.style.opacity = '1';
-          tseBanner.style.pointerEvents = 'auto';
-        }
-      } else {
-        if (badge) {
-          badge.className = 'status-badge offline';
-          badge.innerHTML = `<span class="status-dot orange"></span><span>Modo Offline</span>`;
-        }
-        if (tseBanner) {
-          tseBanner.style.opacity = '0.75';
-        }
-      }
-    }
-
-    window.addEventListener('online', atualizarStatusConexao);
-    window.addEventListener('offline', atualizarStatusConexao);
-
-    function baixarAppOffline() {
-      acionarVibracao();
-      limparBusca();
+    // Voz
+    function iniciarBuscaPorVoz() {
+      haptic();
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return showToast("Voz não suportada.");
       
-      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'Consulta_Secoes_Eleitorais_Offline.html';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const rec = new SpeechRecognition();
+      rec.lang = 'pt-BR';
+      const btn = document.getElementById('voiceBtn');
+      btn.classList.add('recording');
+
+      rec.onresult = (e) => {
+        const nums = e.results[0][0].transcript.replace(/\D/g, '');
+        if (nums) { document.getElementById('searchInput').value = nums; buscarSecao(); }
+        else showToast("Fale apenas números.");
+      };
+      rec.onend = () => btn.classList.remove('recording');
+      rec.onerror = () => { btn.classList.remove('recording'); showToast("Erro no microfone."); };
+      rec.start();
     }
 
-    function inicializarAplicativo() {
-      try {
-        atualizarStatusConexao();
-        mudarAba('principais');
-      } catch (err) {
-        console.error("Erro ao inicializar aplicativo:", err);
-      }
+    // Rede
+    function attStatus() {
+      const dot = document.querySelector('.status-dot');
+      if (navigator.onLine) { dot.classList.remove('offline'); }
+      else { dot.classList.add('offline'); }
     }
+    window.addEventListener('online', attStatus);
+    window.addEventListener('offline', attStatus);
 
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      inicializarAplicativo();
-    } else {
-      document.addEventListener('DOMContentLoaded', inicializarAplicativo);
-    }
+    // Boot
+    document.addEventListener('DOMContentLoaded', () => {
+      attStatus();
+      mudarAba('principais');
+    });
   </script>
 </body>
 </html>
